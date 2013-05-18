@@ -8,7 +8,13 @@ Raspberry Pi or other low-end server.
 Requirements
 ------------
 
-You will need to install Python (2.7+ or 3.3+)
+You will need to install _Python_ (2.7+ or 3.3+) where you wish to run the 
+server. Installers for Windows and Mac can be found at 
+<http://www.python.org/download/>. There are also tarballs for Linux, although 
+the best way to install on Linux would be via the package manager.
+
+To allow players to connect remotely, the server will also need to be connected
+to the internet. 
 
 
 Running the Server
@@ -16,8 +22,8 @@ Running the Server
 
 ### On Windows
 
-Double click on "simplemud.py" - the file will be opened with the Python 
-interpreter
+Double click on `simplemud.py` - the file will be opened with the Python 
+interpreter. To stop the server, simply close the terminal window.
 
 ### On Mac
 
@@ -29,7 +35,8 @@ From the terminal, change to the directory containing the script and run
 
 	sudo python simplemud.py
 	
-The script must be run as root in order to have permission to listen on port 23.
+The script must be run as root in order to have permission to listen on
+port 23. To stop the server, hit `ctl + c`.
 
 
 Connecting to the Server
@@ -51,7 +58,12 @@ prompt and start the telnet client by running:
 	telnet <ip address>
 	
 where `<ip address>` is the external IP address of the server, as described 
-above.
+above. If all goes well, you should be presented with the message 
+
+	What is your name?
+
+To quit the telnet client, press `ctl + ]` to go to the prompt, and then 
+type `quit`.
 
 
 What is Telnet?
@@ -60,7 +72,8 @@ What is Telnet?
 Telnet is simple text-based network communication protocol that was invented in
 1969 and has since been superseded by other, more secore protocols. It does 
 remain popular for a few specialised uses however, MUD games being one of these
-uses.
+uses. A long (and boring) history of the telnet protocol can be found here:
+<http://www.cs.utexas.edu/users/chris/think/ARPANET/Telnet/Telnet.shtml>
 
 
 What is a MUD?
@@ -69,7 +82,33 @@ What is a MUD?
 MUD is short for Multi-User Dungeon. A MUD is a text-based online role-playing
 game. MUDs were popular in the early 80s and were the precursor to the 
 graphical Massively-Multiplayer Online Role-Playing Games we have today, like 
-World of Warcraft.
+World of Warcraft. <http://www.mudconnect.com> is a great site for learning 
+more about MUDs.
+
+
+Extending the Game
+------------------
+
+MUD Pi is a free and open source project (that's _free_ as in _freedom_). This 
+means that the source code is included and you are free to read it, copy it, 
+extend it and use it as a starting point for your own MUD game or any other 
+project. See _LICENCE.md_ for more info.
+
+MUD Pi was written in the Python programming language. If you have never used
+Python before, or are new to programming in general, why not try an online
+tutorial, such as <http://www.learnpython.org/>.
+
+There are 2 source files in the project. `mudserver.py` is a module containing
+the `MudServer` class - a basic server script which handles player connections 
+and sending and receiving messages. `simplemud.py` is an example game using 
+`MudServer`, with player chat and rooms to move between. 
+
+The best place to start tweaking the game would be to have a look at 
+`simplemud.py`. Why not try adding more rooms to the game world? You'll find
+more ideas for things to try in the source code itself.
+
+Of course if you're feeling more adventurous you could take a look at the 
+slightly more advanced networking code in `mudserver.py`.
 
 
 Author

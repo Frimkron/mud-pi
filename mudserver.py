@@ -173,7 +173,7 @@ class MudServer(object):
         """
         # we make sure to put a newline on the end so the client receives the
         # message on its own line
-        self._attempt_send(to,message+"\n")
+        self._attempt_send(to,message+"\n\r")
 
         
     def shutdown(self):
@@ -231,7 +231,7 @@ class MudServer(object):
         # construct a new _Client object to hold info about the newly connected
         # client. Use 'nextid' as the new client's id number
         self._clients[self._nextid] = MudServer._Client(joined_socket,addr[0],"",time.time())
-        
+
         # add a new player occurence to the new events list with the player's id 
         # number
         self._new_events.append((self._EVENT_NEW_PLAYER,self._nextid))
@@ -250,11 +250,10 @@ class MudServer(object):
             # client and move on to the next one
             if time.time() - cl.lastcheck < 5.0: continue
             
-            # send the client the special "are you there" telnet command. It doesn't
-            # actually matter what we send, we're really just checking that data can
-            # still be written to the socket. If it can't, an error will be raised
-            # and we'll know that the client has disconnected.
-            self._attempt_send(id,""+chr(self._TN_INTERPRET_AS_COMMAND)+chr(self._TN_ARE_YOU_THERE))
+            # send the client an invisible character. It doesn't actually matter what we send, 
+            # we're really just checking that data can still be written to the socket. If it can't, 
+            # an error will be raised and we'll know that the client has disconnected.
+            self._attempt_send(id,"\x00")
             
             # update the last check time
             cl.lastcheck = time.time()
@@ -344,6 +343,13 @@ class MudServer(object):
                 elif c == "\n":
                     message = client.buffer
                     client.buffer = ""
+                
+                # some telnet clients send the characters as soon as the user types 
+                # them. So if we get a backspace character, this is where the user has 
+                # deleted a character and we should delete the last character from
+                # the buffer.
+                elif c == "\x08":
+                	client.buffer = client.buffer[:-1]
                     
                 # otherwise it's just a regular character - add it to the buffer
                 # where we're building up the received message
