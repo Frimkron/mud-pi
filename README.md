@@ -25,18 +25,15 @@ Running the Server
 Double click on `simplemud.py` - the file will be opened with the Python 
 interpreter. To stop the server, simply close the terminal window.
 
-### On Mac
 
-** TODO **
-
-### On Linux (including Raspberry Pi)
+### On Mac OSX and Linux (including Raspberry Pi)
 
 From the terminal, change to the directory containing the script and run 
 
 	sudo python simplemud.py
 	
 The script must be run as root in order to have permission to listen on
-port 23. To stop the server, hit `ctl + c`.
+port 23.
 
 
 Connecting to the Server
