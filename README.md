@@ -67,7 +67,7 @@ What is Telnet?
 ---------------
 
 Telnet is simple text-based network communication protocol that was invented in
-1969 and has since been superseded by other, more secore protocols. It does 
+1969 and has since been superseded by other, more secure protocols. It does 
 remain popular for a few specialised uses however, MUD games being one of these
 uses. A long (and boring) history of the telnet protocol can be found here:
 <http://www.cs.utexas.edu/users/chris/think/ARPANET/Telnet/Telnet.shtml>
@@ -89,7 +89,7 @@ Extending the Game
 MUD Pi is a free and open source project (that's _free_ as in _freedom_). This 
 means that the source code is included and you are free to read it, copy it, 
 extend it and use it as a starting point for your own MUD game or any other 
-project. See _LICENCE.md_ for more info.
+project. See `licence.md` for more info.
 
 MUD Pi was written in the Python programming language. If you have never used
 Python before, or are new to programming in general, why not try an online
