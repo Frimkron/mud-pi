@@ -11,6 +11,8 @@ Some ideas for things to try adding:
     * Items to pick up e.g. 'take rock' -> 'You pick up the rock'
     * Monsters to fight
     * Loot to collect
+    * Saving players accounts between sessions
+    * A password login
     * A shop from which to buy items
 
 author: Mark Frimston - mfrimston@gmail.com
@@ -47,28 +49,21 @@ while True:
     
     
     # go through any newly connected players
-    for id,name in mud.get_new_players():
+    for id in mud.get_new_players():
     
-        # add the new player to the dictionary along with their name. 
+        # add the new player to the dictionary, noting that they've not been
+        # named yet.
         # The dictionary key is the player's id number. Start them off in the 
         # 'Tavern' room.
         # Try adding more player stats - level, gold, inventory, etc
         players[id] = { 
-            "name": name ,
+            "name": None,
             "room": "Tavern",
         }
         
-        # go through all the players in the game
-        for pid,pl in players.items():
-            # send each player a message to tell them about the new player
-            mud.send_message(pid,"%s entered the game" % players[id]["name"])
-            
-        # send the new player a welcome message
-        mud.send_message(id,"Welcome to the game, %s. Type 'help' for a list of commands. Have fun!" % players[id]["name"])
+        # send the new player a prompt for their name
+        mud.send_message(id,"What is your name?")
         
-        # send the new player the description of their current room
-        mud.send_message(id,rooms[players[id]["room"]]["description"])
-    
     
     # go through any recently disconnected players    
     for id in mud.get_disconnected_players():
@@ -93,11 +88,27 @@ while True:
         # move on to the next one
         if id not in players: continue
     
+        # if the player hasn't given their name yet, use this first command as their name
+        if players[id]["name"] is None:
+            
+            players[id]["name"] = command
+            
+            # go through all the players in the game
+            for pid,pl in players.items():
+                # send each player a message to tell them about the new player
+                mud.send_message(pid,"%s entered the game" % players[id]["name"])
+            
+            # send the new player a welcome message
+            mud.send_message(id,"Welcome to the game, %s. Type 'help' for a list of commands. Have fun!" % players[id]["name"])
+            
+            # send the new player the description of their current room
+            mud.send_message(id,rooms[players[id]["room"]]["description"])
+                
         # each of the possible commands is handled below. Try adding new commands
         # to the game!
     
         # 'help' command
-        if command == "help":
+        elif command == "help":
         
             # send the player back the list of possible commands
             mud.send_message(id,"Commands:")
