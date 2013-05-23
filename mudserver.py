@@ -349,7 +349,7 @@ class MudServer(object):
                 # deleted a character and we should delete the last character from
                 # the buffer.
                 elif c == "\x08":
-                	client.buffer = client.buffer[:-1]
+                    client.buffer = client.buffer[:-1]
                     
                 # otherwise it's just a regular character - add it to the buffer
                 # where we're building up the received message

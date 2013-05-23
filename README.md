@@ -17,9 +17,9 @@ To allow players to connect remotely, the server will also need to be connected
 to the internet. 
 
 To connect to the server you will need a telnet client. On Mac, Linux, and 
-versions of Windows prior to 7, the telnet client is usually installed by 
-default. For Windows 7 or 8, you may need to follow
-[this guide](http://social.technet.microsoft.com/wiki/contents/articles/910.how-to-enable-telnet-client-in-windows-7.aspx)
+versions of Windows prior to Windows Vista, the telnet client is usually 
+installed by default. For Windows Vista, 7, or 8, you may need to follow
+[this guide](http://technet.microsoft.com/en-us/library/cc771275%28v=ws.10%29.aspx)
 to install it.
 
 
@@ -63,12 +63,12 @@ prompt and start the telnet client by running:
 where `<ip address>` is the external IP address of the server, as described 
 above. 
 
-If you are using Windows 7 or 8 and get the message:
+If you are using Windows Vista, 7, or 8 and get the message:
 
 	'telnet' is not recognized as an internal or external command, operable
 	program or batch file.
 	
-then follow [this guide](http://social.technet.microsoft.com/wiki/contents/articles/910.how-to-enable-telnet-client-in-windows-7.aspx)
+then follow [this guide](http://technet.microsoft.com/en-us/library/cc771275%28v=ws.10%29.aspx)
 to install the Windows telnet client.
 
 If all goes well, you should be presented with the message 
