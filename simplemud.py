@@ -18,6 +18,8 @@ Some ideas for things to try adding:
 author: Mark Frimston - mfrimston@gmail.com
 """
 
+import logging
+
 # import the MUD server class
 from mudserver import MudServer
 
@@ -35,6 +37,9 @@ rooms = {
 
 # stores the players in the game
 players = {}
+
+# set up logging to file
+logging.basicConfig(filename="mud.log",level=logging.INFO,format="[%(levelname)s] %(message)s")
 
 # start the server
 mud = MudServer()
@@ -124,7 +129,10 @@ while True:
                 # if they're in the same room as the player
                 if players[pid]["room"] == players[id]["room"]:
                     # send them a message telling them what the player said
-                    mud.send_message(pid,"%s says: %s" % (players[id]["name"],params) )
+                    message = "%s says: %s" % (players[id]["name"],params)
+                    mud.send_message(pid,message)
+                    # log the message
+                    logging.info(message)
                     
         # 'look' command
         elif command == "look":
