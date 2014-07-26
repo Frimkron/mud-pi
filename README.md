@@ -41,6 +41,16 @@ From the terminal, change to the directory containing the script and run
 The script must be run as root in order to have permission to listen on
 port 23.
 
+Note, if you are connected to the machine via SSH, you will find that the 
+script stops running when you quit the SSH session. A simple way to leave the 
+script running is to use a tool called `screen`. Connect via SSH as usual then
+run `screen`. You will enter what looks like a normal shell prompt, but now you
+can start the python script running and hit `ctl+a` followed by `d` to leave
+_screen_ running in the background. The next time you connect, you can 
+re-attach to your screen session using `screen -r`. Alternatively you could
+[create a daemon script](http://jimmyg.org/blog/2010/python-daemon-init-script.html)
+to run the script in the background every time the server starts.
+
 
 Connecting to the Server
 ------------------------
