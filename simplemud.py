@@ -18,6 +18,8 @@ Some ideas for things to try adding:
 author: Mark Frimston - mfrimston@gmail.com
 """
 
+import time
+
 # import the MUD server class
 from mudserver import MudServer
 
@@ -191,4 +193,5 @@ while True:
         else:
             # send back an 'unknown command' message
             mud.send_message(id, "Unknown command '%s'" % command)
-                
+
+        time.sleep(0.2)
