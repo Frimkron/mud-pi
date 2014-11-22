@@ -44,6 +44,9 @@ mud = MudServer()
 # main game loop. We loop forever (i.e. until the program is terminated)
 while True:
 
+	# pause for 1/5 of a second on each loop, so that we don't constantly 
+	# use 100% CPU time
+    time.sleep(0.2)
 
     # 'update' must be called in the loop to keep the game running and give
     # us up-to-date information
@@ -194,4 +197,3 @@ while True:
             # send back an 'unknown command' message
             mud.send_message(id, "Unknown command '%s'" % command)
 
-        time.sleep(0.2)
