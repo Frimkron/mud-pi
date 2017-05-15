@@ -98,9 +98,11 @@ class MudServer(object):
                                        1)
 
         # bind the socket to an ip address and port. Port 23 is the standard
-        # telnet port which telnet clients will use. Address 0.0.0.0 means that
-        # we will bind to all of the available network interfaces
-        self._listen_socket.bind(("0.0.0.0", 23))
+        # telnet port which telnet clients will use, however on some platforms
+        # this requires root permissions, so we use a higher arbitrary port
+        # number instead: 1234. Address 0.0.0.0 means that we will bind to all
+        # of the available network interfaces
+        self._listen_socket.bind(("0.0.0.0", 1234))
 
         # set to non-blocking mode. This means that when we call 'accept', it
         # will return immediately without waiting for a connection

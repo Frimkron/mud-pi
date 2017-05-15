@@ -18,7 +18,7 @@ to the internet.
 
 To connect to the server you will need a telnet client. On Mac, Linux, and 
 versions of Windows prior to Windows Vista, the telnet client is usually 
-installed by default. For Windows Vista, 7, or 8, you may need to follow
+installed by default. For Windows Vista, 7, 8 or later, you may need to follow
 [this guide](http://technet.microsoft.com/en-us/library/cc771275%28v=ws.10%29.aspx)
 to install it.
 
@@ -36,11 +36,8 @@ interpreter. To stop the server, simply close the terminal window.
 
 From the terminal, change to the directory containing the script and run 
 
-	sudo python simplemud.py
+	python simplemud.py
 	
-The script must be run as root in order to have permission to listen on
-port 23.
-
 Note, if you are connected to the machine via SSH, you will find that the 
 script stops running when you quit the SSH session. A simple way to leave the 
 script running is to use a tool called `screen`. Connect via SSH as usual then
@@ -56,7 +53,7 @@ Connecting to the Server
 ------------------------
 
 If the server is running behind a NAT such as a home router, you will need to 
-set up port 23 to be forwarded to the machine running the server. See your 
+set up port **1234** to be forwarded to the machine running the server. See your
 router's instructions for how to set this up. There are a large number of 
 setup guides for different models of router here: 
 <http://portforward.com/english/routers/port_forwarding/>
@@ -68,17 +65,18 @@ that machine.
 To connect to the server, open your operating system's terminal or command
 prompt and start the telnet client by running:
 
-	telnet <ip address>
+	telnet <ip address> 1234
 	
 where `<ip address>` is the external IP address of the server, as described 
-above. 
+above. 1234 is the port number that the server listens on.
 
-If you are using Windows Vista, 7, or 8 and get the message:
+If you are using Windows Vista, 7, 8 or later and get the message:
 
 	'telnet' is not recognized as an internal or external command, operable
 	program or batch file.
 	
-then follow [this guide](http://technet.microsoft.com/en-us/library/cc771275%28v=ws.10%29.aspx)
+then follow 
+[this guide](http://technet.microsoft.com/en-us/library/cc771275%28v=ws.10%29.aspx)
 to install the Windows telnet client.
 
 If all goes well, you should be presented with the message 
