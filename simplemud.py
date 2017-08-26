@@ -61,12 +61,12 @@ while True:
 
         # add the new player to the dictionary, noting that they've not been
         # named yet.
-        # The dictionary key is the player's id number. Start them off in the
-        # 'Tavern' room.
+        # The dictionary key is the player's id number. We set their room to
+        # None initially until they have entered a name
         # Try adding more player stats - level, gold, inventory, etc
         players[id] = {
             "name": None,
-            "room": "Tavern",
+            "room": None,
         }
 
         # send the new player a prompt for their name
@@ -99,10 +99,11 @@ while True:
             continue
 
         # if the player hasn't given their name yet, use this first command as
-        # their name
+        # their name and move them to the starting room.
         if players[id]["name"] is None:
 
             players[id]["name"] = command
+            players[id]["room"] = "Tavern"
 
             # go through all the players in the game
             for pid, pl in players.items():
