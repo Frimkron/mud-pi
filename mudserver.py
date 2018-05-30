@@ -6,12 +6,34 @@ server running then used to send and receive messages from players.
 
 author: Mark Frimston - mfrimston@gmail.com
 """
-
-
 import socket
 import select
 import time
 import sys
+import enum
+from collections import deque
+
+#creating an Enum for EventTypes
+class EventType(enum.Enum):
+    PLAYER_JOIN = 0
+    MESSAGE_RECEIVED = 1
+    PLAYER_DISCONNECT = 2
+
+'''
+class representing Events for the server code to handle
+type: an EventType
+id: corresponding playerID
+message: a string message 
+'''
+#possibly change this to a dict, it might be more pythonic that way
+class Event:
+    def __init__(self, eventType, id, message):
+        self.type = eventType
+        self.id = id
+        self.message = message
+    
+    def __str__(self):
+        return "%s\t%s\t\"%s\"" % (self.type, self.id, self.message)
 
 
 class MudServer(object):
@@ -110,6 +132,8 @@ class MudServer(object):
 
         # start listening for connections on the socket
         self._listen_socket.listen(1)
+        # using a deque for the event queue
+        self.server_queue = deque()
 
     def update(self):
         """Checks for new players, disconnected players, and new
@@ -209,6 +233,7 @@ class MudServer(object):
         # KeyError will be raised if there is no client with the given id in
         # the map
         except KeyError:
+            print("Key error occurred.", file=sys.stderr)
             pass
         # If there is a connection problem with the client (e.g. they have
         # disconnected) a socket error will be raised
@@ -246,9 +271,13 @@ class MudServer(object):
         # add a new player occurence to the new events list with the player's
         # id number
         self._new_events.append((self._EVENT_NEW_PLAYER, self._nextid))
+        self.server_queue.append(Event(EventType.PLAYER_JOIN, self._nextid, ""))
+
+        
 
         # add 1 to 'nextid' so that the next client to connect will get a
         # unique id number
+        # this id system may need to be overhauled later
         self._nextid += 1
 
     def _check_for_disconnected(self):
@@ -299,16 +328,13 @@ class MudServer(object):
 
                     # remove any spaces, tabs etc from the start and end of
                     # the message
-                    message = message.strip()
-
-                    # separate the message into the command (the first word)
-                    # and its parameters (the rest of the message)
-                    command, params = (message.split(" ", 1) + ["", ""])[:2]
+                    # message will be handled by the server
+                    raw_message = message.strip()
 
                     # add a command occurence to the new events list with the
                     # player's id number, the command and its parameters
-                    self._new_events.append((self._EVENT_COMMAND, id,
-                                             command.lower(), params))
+                    # using our queue
+                    self.server_queue.append(Event(EventType.MESSAGE_RECEIVED, id, raw_message))
 
             # if there is a problem reading from the socket (e.g. the client
             # has disconnected) a socket error will be raised
@@ -323,6 +349,7 @@ class MudServer(object):
         # add a 'player left' occurence to the new events list, with the
         # player's id number
         self._new_events.append((self._EVENT_PLAYER_LEFT, clid))
+        self.server_queue.append(Event(EventType.PLAYER_DISCONNECT, clid, ""))
 
     def _process_sent_data(self, client, data):
 
