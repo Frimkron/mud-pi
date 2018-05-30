@@ -16,6 +16,17 @@ Checkout the [DESIGN.md](docs/DESIGN.md) file for a high level explanation of th
 
 Check to see if someone already reported this [bug]() already exists. If so then leave a comment on that issue. If not, please provide a detailed description of the bug. Include what was happening before the error, all settings, and test results. This helps us more quickly identify and solve any problems. Create an **[Issue]()** with the description and add a bug label. We will do our best to respond quickly to it. 
 
+### Testing your own Server
+
+To test server code on your own machine, run
+
+	python MuddySwamp.py
+
+Then with a telnet client, you will connect to the following IP like so:
+
+	telnet 127.0.0.1 1234
+
+For contributors working on server code, make sure you test changes like so before submitting changes.
 ### Request a Feature
 
 Check to see if the feature is already listed in our [TODO.md](docs/TODO.md). If it's not, describe the feature and why it would be beneficial. Create an **[Issue]()** with this description and add a feature enhancement label. We will do our best to respond quickly to it. 

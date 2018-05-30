@@ -42,12 +42,14 @@ Utilties found in `./util/`
   - needs better name
   - checks all Locations, Characters, and Interactables
 
-
+s
 ## Timeline (Work in Progress)
 
 ### Phase 1 (Really Really Minimal Viable Product)
   - "GatorChat"
-  - profanity filter
+  - ~~profanity filter~~ turns out this is a bad idea
+    - if interested, read up on the "clbuttic mistake"
+    - we have opted for a reporting system instead
   - player names
   - only one chat room
 
