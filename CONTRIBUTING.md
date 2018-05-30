@@ -51,11 +51,11 @@ Check to see if the feature is already listed in our [TODO.md](docs/TODO.md). If
 
 ## Style Guide 
 
-Use our **[.editorconfig]()** to help automatically format your code. A short list of what we require. 
+Use our **[.editorconfig]()** to help automatically format your code. A short list of what we require:
 - **Use descriptive names for everything**
 - **Make meaningful comments often**
-- **Indent with tabs, use spaces everywhere else**
-- **Put curly braces on a new line**
-- **Keep line length under 100 characters**
 
 For a longer more descriptive list, check out our club's **[general style guidelines](https://github.com/ufosc/resources/blob/master/coding-guidelines/general-style.md)**.
+
+As a python project, we follow PEP 8. Read more information [here](https://www.python.org/dev/peps/pep-0008/)
+Good code in readable code.
