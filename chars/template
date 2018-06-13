@@ -1,0 +1,24 @@
+{
+    "name" : [NAME]
+    "frequency" : [FREQUENCY]
+    "path" : [PATH]
+}
+notes:
+[NAME]
+the classname of the desired import, it should be defined in the script file
+(this will be executed as, "from scriptname import classname")
+
+[FREQUENCY]
+the relative frequency of players becoming this class
+can be float or int
+Probability that the player becomes this class is equal to
+frequency / the summation of all other class frequencies
+
+So if frequencies are Dog:1, Bird:3, Cat:6
+the summation = 10
+the probability of spawning as a Dog = 1 / 10
+
+[PATH]
+the path to the script, assuming that it is called from the
+highest folder in the git repository (i.e. the one containing
+"scripts", "locations", "chars", etc.)
