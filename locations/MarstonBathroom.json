@@ -1,0 +1,14 @@
+{
+    "name": "Marston Basement Bathroom",
+    "description": "echoes abound",
+    "exits": [
+        {
+            "destination": "Marston Basement",
+            "names": ["exit", "marston basement"]
+        },
+        {
+            "destination": "Narnia",
+            "names": ["portal", "0w0 what's this", "this dependency should fail"]
+        }
+    ]
+}

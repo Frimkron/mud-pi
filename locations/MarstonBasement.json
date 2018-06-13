@@ -3,12 +3,12 @@
     "description": "You hear a girl munching on Chipotle.\nDid you ever think you would spend so much time on a computer?",
     "exits": [
         {
-            "destination": "Marston First Floor",
-            "names": ["first floor", "marston first floor", "first"]
-        },
-        {
             "destination": "Marston Basement Bathroom",
             "names": ["bathroom", "marston basement bathroom"]
+        },
+        {
+            "destination": "Marston First Floor",
+            "names": ["first floor", "this will be an error"]
         }
     ]
 }
