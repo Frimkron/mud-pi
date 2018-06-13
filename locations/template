@@ -3,11 +3,11 @@
     "description": "Enter a descriptive few sentences. \nYou can also put newlines",
     "exits": [
         {
-            "location": "location this exit points to",
+            "destination": "destination this exit points to",
             "names": ["primary name", "other name1", "other name2"]
         },
         {
-            "location": "here is another location",
+            "destination": "here is another destination",
             "names": ["primary name"]
         }
     ]
