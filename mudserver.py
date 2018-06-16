@@ -208,6 +208,12 @@ class MudServer(object):
         # we make sure to put a newline on the end so the client receives the
         # message on its own line
         self._attempt_send(to, message+"\n\r")
+    
+    def send_message_to_all(self, message):
+        """Sends the text in the 'message' parameter to every player that
+        is connected to the server"""
+        for client in self._clients:
+            self.send_message(client, message)
 
     def shutdown(self):
         """Closes down the server, disconnecting all clients and
