@@ -82,7 +82,7 @@ class Location:
 
     def exit_list(self):
         '''returns a copy of private exit list'''
-        return list(exit_list)
+        return list(self._exit_list)
 
     def __eq__(self, other):
         return self.name == other
