@@ -68,10 +68,8 @@ while True:
             if players[id]["name"] is None:
                 players[id]["name"] = event.message.split(" ")[0]
                 players[id]["room"] = "Tavern"
-                for pid, pl in players.items():
-                    # send each player a message to tell them about the new player
-                    mud.send_message(pid, "%s entered the game" %
-                                                            players[id]["name"])
+                # send each player a message to tell them about the new player
+                mud.send_message_to_all("%s entered the game" % players[id]["name"])
                 mud.send_message(id, "Welcome to the game, %s. " %
                                                            players[id]["name"]
                              + "Type 'help' for a list of commands. Have fun!")
@@ -183,6 +181,5 @@ while True:
             err_print("Player %s left" % event.id)
             #if the player has been added to the list, they must be removed
             if event.id in players:
-                for pid in players:
-                    mud.send_message(pid, "%s quit the game" % players[event.id]["name"])
+                mud.send_message_to_all("%s quit the game" % players[event.id]["name"])
                 del(players[id])

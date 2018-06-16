@@ -12,6 +12,8 @@ import time
 import sys
 import enum
 from collections import deque
+from numbers import Number
+from location import Location
 
 #creating an Enum for EventTypes
 class EventType(enum.Enum):
@@ -214,6 +216,26 @@ class MudServer(object):
         is connected to the server"""
         for client in self._clients:
             self.send_message(client, message)
+    
+    def send_message_to_location(self, location, message):
+        """Sends a message to every player in the location passed"""
+        if isinstance(location, Location):
+            self.send_message_to_list(location.get_player_list(), message)
+    
+    def send_message_to_list(self, to_who, message):
+        """Sends the text in the 'message' parameter to every player that
+        is in the 'to_who' parameter. The to_who list can either be a list of 
+        Location objects or a list of client ids."""
+        # Make sure the parameter is actually a list with data in it
+        if isinstance(to_who, list) and len(to_who) > 0:
+            # Handle a list of player ids
+            if isinstance(to_who[0], Number):
+                for player_id in to_who:
+                    self.send_message(player_id, message)
+            # Handle a list of Locations
+            elif isinstance(to_who[0], Location):
+                for location in to_who:
+                    self.send_message_to_location(location, message)
 
     def shutdown(self):
         """Closes down the server, disconnecting all clients and
