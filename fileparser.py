@@ -1,5 +1,8 @@
 import json
 from location import Location, Exit
+from numbers import Number
+import os
+import importlib
 '''
 module that holds all parsers for file IO
 '''
@@ -167,6 +170,45 @@ class LocationParser(BaseParser):
             exit_list.append(dependency)
         self.depend_list.extend(exit_list)
         return imported_location
+
+class CharacterParser(BaseParser):
+    '''Class for Character-Specific parsing'''
+
+    def __init__(self, library={}, fail_library={}):
+        # Call the constructor from BaseParser
+        super().__init__(type, library, fail_library)
+    
+    def import_file(self, filename):
+        '''Imports a Character from a json sepecified by [filename]'''
+
+        # Try to read the json file
+        with open(filename, 'r') as character_file:
+            json_data = json.load(character_file)
+        
+        # Get the data out of the file
+        imported_name = json_data["name"]
+        imported_frequency = json_data["frequency"]
+        imported_path = json_data["path"]
+
+        # Check to make sure that the name and frequency are the right types
+        if not isinstance(imported_name, str) or not isinstance(imported_frequency, Number):
+            raise TypeError('Wrong type when parsing character name or frequency')
+        
+        # Make sure the script exists
+        if not os.path.exists(imported_path):
+            raise IOError('Character path does not exist')
+        
+        # Try to get the script file from the json data
+        module = importlib.import_module(imported_path.replace('.py', '').replace('/', '.'))
+        character_class = module.__dict__[imported_name]
+
+        # Check to see if the class imported actually exists
+        if character_class is None:
+            raise IOError("Could not find character class when parsing")
+        else:
+            # Return a new instance of the imported class
+            return character_class(imported_frequency)
+
         
 # Sample test code
 library = {}
