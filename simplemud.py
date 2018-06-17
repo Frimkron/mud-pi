@@ -240,21 +240,26 @@ thread.start()
 
 # Look for input on the server and send it to the thread
 while True:
-    command, params = (input("").split(" ", 1) + ["", ""])[:2]
-    if command == "broadcast":
-        q.put(ServerComand(ServerCommandEnum.BROADCAST_MESSAGE, u"\u001b[32m" + "[Server] " + params + u"\u001b[0m"))
-    elif command == "players":
-        q.put(ServerComand(ServerCommandEnum.GET_PLAYERS, ""))
-    elif command == "stop":
+    try:
+        command, params = (input("").split(" ", 1) + ["", ""])[:2]
+        if command == "broadcast":
+            q.put(ServerComand(ServerCommandEnum.BROADCAST_MESSAGE, u"\u001b[32m" + "[Server] " + params + u"\u001b[0m"))
+        elif command == "players":
+            q.put(ServerComand(ServerCommandEnum.GET_PLAYERS, ""))
+        elif command == "stop":
+            q.put(ServerComand(ServerCommandEnum.BROADCAST_MESSAGE, u"\u001b[32m" + "[Server] " + "Server shutting down..." + u"\u001b[0m"))
+            break
+        elif command == "help":
+            logging.info("Server commands are: \n" \
+            " broadcast [message] - Broadcasts a message to the entire server\n"\
+            " players - Prints a list of all players\n" \
+            " stop - Stops the server")
+        else:
+            logging.info("Command not recognized. Type help for a list of commands.")
+    except KeyboardInterrupt:
+        logging.info("Keyboard interrupt detected. Shutting down.")
         q.put(ServerComand(ServerCommandEnum.BROADCAST_MESSAGE, u"\u001b[32m" + "[Server] " + "Server shutting down..." + u"\u001b[0m"))
         break
-    elif command == "help":
-        logging.info("Server commands are: \n" \
-        " broadcast [message] - Broadcasts a message to the entire server\n"\
-        " players - Prints a list of all players\n" \
-        " stop - Stops the server")
-    else:
-        logging.info("Command not recognized. Type help for a list of commands.")
 
 
 # Shut down the server gracefully
