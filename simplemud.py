@@ -248,6 +248,14 @@ while True:
     elif command == "stop":
         q.put(ServerComand(ServerCommandEnum.BROADCAST_MESSAGE, u"\u001b[32m" + "[Server] " + "Server shutting down..." + u"\u001b[0m"))
         break
+    elif command == "help":
+        logging.info("Server commands are: \n" \
+        " broadcast [message] - Broadcasts a message to the entire server\n"\
+        " players - Prints a list of all players\n" \
+        " stop - Stops the server")
+    else:
+        logging.info("Command not recognized. Type help for a list of commands.")
+
 
 # Shut down the server gracefully
 logging.info("Shutting down server")
