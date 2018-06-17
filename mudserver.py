@@ -11,6 +11,7 @@ import select
 import time
 import sys
 import enum
+import logging
 from collections import deque
 from numbers import Number
 from location import Location
@@ -113,6 +114,8 @@ class MudServer(object):
         self._events = []
         self._new_events = []
 
+        logging.debug("Starting listening socket.")
+
         # create a new tcp socket which will be used to listen for new clients
         self._listen_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
@@ -134,6 +137,8 @@ class MudServer(object):
 
         # start listening for connections on the socket
         self._listen_socket.listen(1)
+
+        logging.info("Listening on " + ":".join(map(str, self._listen_socket.getsockname())))
         # using a deque for the event queue
         self.server_queue = deque()
 
@@ -261,7 +266,7 @@ class MudServer(object):
         # KeyError will be raised if there is no client with the given id in
         # the map
         except KeyError:
-            print("Key error occurred.", file=sys.stderr)
+            logging.error("Key error occurred.")
             pass
         # If there is a connection problem with the client (e.g. they have
         # disconnected) a socket error will be raised
@@ -286,6 +291,8 @@ class MudServer(object):
         # 'accept' returns a new socket and address info which can be used to
         # communicate with the new client
         joined_socket, addr = self._listen_socket.accept()
+
+        logging.info("Client connected at: " + ":".join(map(str, addr)))
 
         # set non-blocking mode on the new socket. This means that 'send' and
         # 'recv' will return immediately without waiting

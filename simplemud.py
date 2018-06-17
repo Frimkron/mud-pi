@@ -1,8 +1,17 @@
 #!/usr/bin/env python
 import time
 import sys
+import logging
 # import the MUD server class
 from mudserver import MudServer, Event, EventType
+
+# Setup the logger
+logging.basicConfig(format='%(asctime)s [%(name)s] [%(levelname)s] %(message)s',
+    level=logging.INFO,
+    handlers=[
+        logging.FileHandler("muddyswamp.log"),
+        logging.StreamHandler(sys.stdout)
+    ])
 
 #prints to stderr
 def err_print(*args, **kwargs):
@@ -29,8 +38,12 @@ rooms = {
 # stores the players in the game
 players = {}
 
+logging.info("Starting server")
+
 # start the server
 mud = MudServer()
+
+logging.info("Server started successfully")
 
 # main game loop. We loop forever (i.e. until the program is terminated)
 while True:
@@ -46,14 +59,15 @@ while True:
     # handle events on the server_queue
     while (len(mud.server_queue) > 0):
         event = mud.server_queue.popleft()
-        err_print(event)
+        logging.info(event)
+
         id = event.id
         if event.type is EventType.PLAYER_JOIN:
             # add the new player to the dictionary, noting that they've not been
             # named yet.
             # The dictionary key is the player's id number. We set their room to
             # None initially until they have entered a name
-            err_print("Player %s joined." % event.id)
+            logging.info("Player %s joined." % event.id)
             players[id] = {
                 "name": None,
                 "room": None,
@@ -63,7 +77,7 @@ while True:
         elif event.type is EventType.MESSAGE_RECEIVED:
             # splitting into command + params to make porting the code easier
             command, params = (event.message.split(" ", 1) + ["", ""])[:2]
-            err_print(event.message)
+            logging.debug("Event message: " + event.message)
             # all these elifs will be replaced with "character.parse([input])"
             if players[id]["name"] is None:
                 players[id]["name"] = event.message.split(" ")[0]
@@ -178,7 +192,7 @@ while True:
 
 
         elif event.type is EventType.PLAYER_DISCONNECT:
-            err_print("Player %s left" % event.id)
+            logging.info("Player %s left" % event.id)
             #if the player has been added to the list, they must be removed
             if event.id in players:
                 mud.send_message_to_all("%s quit the game" % players[event.id]["name"])
