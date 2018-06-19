@@ -256,8 +256,8 @@ class MudServer(object):
 
     def _attempt_send(self, clid, data):
         # python 2/3 compatability fix - convert non-unicode string to unicode
-        if sys.version < '3' and type(data) != unicode:
-            data = unicode(data, "latin1")
+        if sys.version < '3' and type(data) != unicode: #pylint: disable=E0602
+            data = unicode(data, "latin1") #pylint: disable=E0602
         try:
             # look up the client in the client map and use 'sendall' to send
             # the message string on the socket. 'sendall' ensures that all of

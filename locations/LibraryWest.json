@@ -1,0 +1,14 @@
+{
+    "name": "Library West",
+    "description": "This \"library\" doesn't have a lot of books... is that a Starbucks?",
+    "exits": [
+        {
+            "destination": "Marston Basement Bathroom",
+            "names": ["bathroom", "marston basement bathroom"]
+        },
+        {
+            "destination": "Marston First Floor",
+            "names": ["first floor", "this will be an error"]
+        }
+    ]
+}
