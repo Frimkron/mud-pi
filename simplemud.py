@@ -2,8 +2,11 @@
 import time
 import sys
 import logging
+from fileparser import import_files, get_filenames
+import library
 # import the MUD server class
 from mudserver import MudServer, Event, EventType
+
 
 # Setup the logger
 logging.basicConfig(format='%(asctime)s [%(name)s] [%(levelname)s] %(message)s',
@@ -13,17 +16,7 @@ logging.basicConfig(format='%(asctime)s [%(name)s] [%(levelname)s] %(message)s',
         logging.StreamHandler(sys.stdout)
     ])
 
-#prints to stderr
-def err_print(*args, **kwargs):
-	print(*args, file=sys.stderr, **kwargs)
-
-VERBOSE_PRINT = False
-def v_print(*args, **kwargs):
-	if VERBOSE_PRINT:
-		err_print(*args, **kwargs)
-
-
-# structure defining the rooms in the game. Try adding more rooms to the game!
+# TODO: change this to use the Location class!
 rooms = {
     "Tavern": {
         "description": "You're in a cozy tavern warmed by an open fire.",
@@ -35,6 +28,17 @@ rooms = {
     }
 }
 
+# defining a set of paths
+# by default, we import every json in chars and locations
+import_paths = {
+    "locations" : get_filenames("./locations/", ".json"),
+    "chars" : get_filenames("./chars/", ".json")
+}
+
+imported_lib = import_files(**import_paths)
+library.store_lib(imported_lib)
+
+# TODO: replace this with the player class
 # stores the players in the game
 players = {}
 
@@ -42,7 +46,7 @@ logging.info("Starting server")
 
 # start the server
 mud = MudServer()
-
+library.store_server(mud)
 logging.info("Server started successfully")
 
 # main game loop. We loop forever (i.e. until the program is terminated)
