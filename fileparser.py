@@ -2,6 +2,7 @@ import json
 from location import Location, Exit
 from numbers import Number
 import os
+import sys
 import importlib
 '''
 module that holds all parsers for file IO
@@ -41,7 +42,7 @@ class Dependency(Exception):
     def resolve(self):
         '''calls the resolution function'''
         self.resolution()
-        print("Resolved dependency:\n%s" % str(self))
+        eprint("Resolved dependency:\n%s" % str(self))
     
     def fail_message(self):
         '''supplies a message when depended upon object failed'''
@@ -99,7 +100,7 @@ class BaseParser:
                 self.depend_list.remove(depend)
 
     def all_to_str(self):
-        """cheap method to get an output for all values in each list"""
+        '''cheap method to get an output for all values in each list'''
         output = "SUCCESS LIST\n"
         for success in self.success_list:
             output += str(success) + "\n"
@@ -174,7 +175,7 @@ class LocationParser(BaseParser):
 class CharacterParser(BaseParser):
     '''Class for Character-Specific parsing'''
 
-    def __init__(self, library={}, fail_library={}):
+    def __init__(segit alf, library={}, fail_library={}):
         # Call the constructor from BaseParser
         super().__init__(type, library, fail_library)
     
@@ -209,18 +210,43 @@ class CharacterParser(BaseParser):
             # Return a new instance of the imported class
             return character_class(imported_frequency)
 
-        
-# Sample test code
-library = {}
-fail_library = {}
-loc = LocationParser(library, fail_library)
-print("All lists should be empty:")
-print(loc.all_to_str())
-print("Importing MarstonBasement.json")
-f = loc.handle_import("locations/MarstonBasement.json")
-print("Importing MarstonBasement.json")
-f = loc.handle_import("locations/MarstonBathroom.json")
-print(loc.all_to_str())
-print("Resolving dependencies")
-loc.resolve_dependencies()
-print(loc.all_to_str())
+
+def eprint(*args, **kwargs):
+    print(*args, file=sys.stderr, **kwargs)
+
+
+def parse_all_files(parser, *files):
+       '''parses all files with specified parser'''
+       for filename in files:
+           parser.handle_import(filename)
+
+
+def import_files(**paths):
+    '''parses all files in paths
+    parsing occurs in the correct order
+    returns a "library"
+    '''
+    library = {}
+    fail_library = {}
+    # creating our two parsers, linked to the libraries
+    locations  = LocationParser(library, fail_library)
+    char_classes = CharacterParser(library, fail_library)
+    eprint(paths)
+    if "locations" in paths:
+        eprint("parsing locations")
+        parse_all_files(locations, *paths["locations"])
+        eprint(locations.all_to_str())
+    # in the future, import items next
+    if "chars" in paths:
+        eprint("parsing char_classes")
+        parse_all_files(char_classes, *paths["chars"])
+        eprint(char_classes.all_to_str())
+    locations.resolve_dependencies()
+    char_classes.resolve_dependencies()    
+    return library
+
+
+def get_filenames(directory, ext=""):
+    '''returns all filenames in [directory] with extension [ext]'''
+    return [directory + name for name in os.listdir(directory) \
+            if name.endswith(ext)]
