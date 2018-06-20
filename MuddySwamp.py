@@ -4,6 +4,7 @@ import sys
 import logging
 # import the MUD server class
 from mudserver import MudServer, Event, EventType
+from location import Location, Exit
 
 # Setup the logger
 logging.basicConfig(format='%(asctime)s [%(name)s] [%(levelname)s] %(message)s',
@@ -24,7 +25,7 @@ def v_print(*args, **kwargs):
 
 
 # structure defining the rooms in the game. Try adding more rooms to the game!
-rooms = {
+'''rooms = {
     "Tavern": {
         "description": "You're in a cozy tavern warmed by an open fire.",
         "exits": {"outside": "Outside"},
@@ -33,8 +34,11 @@ rooms = {
         "description": "You're standing outside a tavern. It's raining.",
         "exits": {"inside": "Tavern"},
     }
-}
-
+}'''
+start_location = Location("Tavern", "this iis the description")
+outside = Location("Outside", "for teh fun of ti")
+start_location.add_exit(Exit(outside, "front door", "outside"))
+outside.add_exit(Exit(start_location, "back inside", "inside", "out of the rain"))
 # stores the players in the game
 players = {}
 
@@ -81,7 +85,7 @@ while True:
             # all these elifs will be replaced with "character.parse([input])"
             if players[id]["name"] is None:
                 players[id]["name"] = event.message.split(" ")[0]
-                players[id]["room"] = "Tavern"
+                players[id]["room"] = start_location
                 # send each player a message to tell them about the new player
                 mud.send_message_to_all("%s entered the game" % players[id]["name"])
                 mud.send_message(id, "Welcome to the game, %s. " %
@@ -114,28 +118,26 @@ while True:
             elif command == "look":
 
                 # store the player's current room
-                rm = rooms[players[id]["room"]]
+                rm = players[id]["room"]
 
                 # send the player back the description of their current room
-                mud.send_message(id, rm["description"])
+                #mud.send_message(id, rm["description"])
+                mud.send_message(id, rm.description)
 
-                playershere = []
-                # go through every player in the game
-                for pid, pl in players.items():
-                    # if they're in the same room as the player
-                    if players[pid]["room"] == players[id]["room"]:
-                        # ... and they have a name to be shown
-                        if players[pid]["name"] is not None:
-                            # add their name to the list
-                            playershere.append(players[pid]["name"])
+
+                
+                players_here = []
+                for id in rm.get_player_list():
+                    players_here.append(players[id]["name"])
+
 
                 # send player a message containing the list of players in the room
                 mud.send_message(id, "Players here: {}".format(
-                                                        ", ".join(playershere)))
+                                                        ", ".join(players_here)))
 
                 # send player a message containing the list of exits from this room
                 mud.send_message(id, "Exits are: {}".format(
-                                                        ", ".join(rm["exits"])))
+                                                        ", ".join([str(x) for x in rm.exit_list()])))
 
             # 'go' command
             elif command == "go":
@@ -144,10 +146,10 @@ while True:
                 ex = params.lower()
 
                 # store the player's current room
-                rm = rooms[players[id]["room"]]
+                rm = players[id]["room"]
 
                 # if the specified exit is found in the room's exits list
-                if ex in rm["exits"]:
+                if ex in rm:
 
                     # go through all the players in the game
                     for pid, pl in players.items():
@@ -161,8 +163,13 @@ while True:
                                                         players[id]["name"], ex))
 
                     # update the player's current room to the one the exit leads to
-                    players[id]["room"] = rm["exits"][ex]
-                    rm = rooms[players[id]["room"]]
+                    '''players[id]["room"] = rm["exits"][ex]
+                    rm = rooms[players[id]["room"]]'''
+                    for exit in rm.exit_list():
+                        if ex == exit:
+                            players[id]["room"] = exit.get_destination()
+
+                    rm = players[id]["room"]
 
                     # go through all the players in the game
                     for pid, pl in players.items():
