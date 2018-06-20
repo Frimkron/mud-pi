@@ -1,0 +1,14 @@
+{
+    "name": "Basement Stall",
+    "description": "The familiar porcelain throne has been stripped out completely, leaving bare tile. A small hole pulsates in the middle of the floor, and you feel drawn in by a soothing emerald light.",
+    "exits" : [
+        {
+            "destination": "Marston Basement Bathroom",
+            "names": ["exit", "bathroom"]
+        },
+        {
+            "destination": "Portal",
+            "names": ["portal", "enter", "this dependency should work"]
+        }
+    ]
+}

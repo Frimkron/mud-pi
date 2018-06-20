@@ -16,10 +16,7 @@ This is a list of planned features and enhancements. It is ordered in highest to
 ## 3) Populate locatons/ with test locations
 (See locations/ for template)
 
-## 4) Prepare a CharacterClass json parser
-(See chars/ for template)
-
-## 5) Perform stress-tests of the server
+## 4) Perform stress-tests of the server
   - test with multiple players connected
   - report errors, limitations
-
+  - message me for IP

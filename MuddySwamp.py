@@ -5,8 +5,12 @@ import logging
 import threading
 import queue
 import enum
+from fileparser import import_files, get_filenames
+import library
 # import the MUD server class
 from mudserver import MudServer, Event, EventType
+from location import Location, Exit
+
 
 # Setup the logger
 logging.basicConfig(format='%(asctime)s [%(threadName)s] [%(levelname)s] %(message)s',
@@ -25,6 +29,13 @@ def v_print(*args, **kwargs):
 	if VERBOSE_PRINT:
 		err_print(*args, **kwargs)
 
+# defining a set of paths
+# by default, we import every json in chars and locations
+import_paths = {
+    "locations" : get_filenames("./locations/", ".json"),
+    "chars" : get_filenames("./chars/", ".json")
+}
+
 # Basic enum for the type of server command
 class ServerCommandEnum(enum.Enum):
     BROADCAST_MESSAGE=0
@@ -36,23 +47,19 @@ class ServerComand:
         self.command_type = command_type
         self.params = params
 
-# structure defining the rooms in the game. Try adding more rooms to the game!
-rooms = {
-    "Tavern": {
-        "description": "You're in a cozy tavern warmed by an open fire.",
-        "exits": {"outside": "Outside"},
-    },
-    "Outside": {
-        "description": "You're standing outside a tavern. It's raining.",
-        "exits": {"inside": "Tavern"},
-    }
-}
-
 class MudServerWorker(threading.Thread):
     def __init__(self, q, *args, **kwargs):
         self.q = q
+        # TODO: replace this with the player class
+        # stores the players in the game
         self.players = {}
         self.keep_running = True
+        imported_lib = import_files(**import_paths)
+        library.store_lib(imported_lib)
+        self.start_location = Location("Starting Location",
+                            "This is the default starting location.")
+        if "Marston Basement" in library.locations:
+            self.start_location = library.locations["Marston Basement"]
         super().__init__(*args, **kwargs)
     
     # Cannot call mud.shutdown() here because it will try to call the sockets in run on the final go through
@@ -62,6 +69,7 @@ class MudServerWorker(threading.Thread):
     def run(self):
         logging.info("Starting server.")
         self.mud = MudServer()
+        library.store_server(self.mud)
         logging.info("Server started successfully.")
         # main game loop. We loop forever (i.e. until the program is terminated)
         while self.keep_running:
@@ -112,7 +120,7 @@ class MudServerWorker(threading.Thread):
                     # all these elifs will be replaced with "character.parse([input])"
                     if self.players[id]["name"] is None:
                         self.players[id]["name"] = event.message.split(" ")[0]
-                        self.players[id]["room"] = "Tavern"
+                        self.players[id]["room"] = self.start_location
                         # send each player a message to tell them about the new player
                         self.mud.send_message_to_all("%s entered the game" % self.players[id]["name"])
                         self.mud.send_message(id, "Welcome to the game, %s. " %
@@ -145,28 +153,21 @@ class MudServerWorker(threading.Thread):
                     elif command == "look":
 
                         # store the player's current room
-                        rm = rooms[self.players[id]["room"]]
+                        rm = self.players[id]["room"]
 
                         # send the player back the description of their current room
-                        self.mud.send_message(id, rm["description"])
+                        self.mud.send_message(id, rm.description)
 
-                        playershere = []
-                        # go through every player in the game
-                        for pid, pl in self.players.items():
-                            # if they're in the same room as the player
-                            if self.players[pid]["room"] == self.players[id]["room"]:
-                                # ... and they have a name to be shown
-                                if self.players[pid]["name"] is not None:
-                                    # add their name to the list
-                                    playershere.append(self.players[pid]["name"])
-
+                        players_here = []
+                        for id in rm.get_player_list():
+                            players_here.append(self.players[id]["name"])
                         # send player a message containing the list of players in the room
                         self.mud.send_message(id, "Players here: {}".format(
-                                                                ", ".join(playershere)))
+                                                                ", ".join(players_here)))
 
                         # send player a message containing the list of exits from this room
                         self.mud.send_message(id, "Exits are: {}".format(
-                                                                ", ".join(rm["exits"])))
+                                                        ", ".join([str(x) for x in rm.exit_list()])))
 
                     # 'go' command
                     elif command == "go":
@@ -175,10 +176,10 @@ class MudServerWorker(threading.Thread):
                         ex = params.lower()
 
                         # store the player's current room
-                        rm = rooms[self.players[id]["room"]]
+                        rm = self.players[id]["room"]
 
                         # if the specified exit is found in the room's exits list
-                        if ex in rm["exits"]:
+                        if ex in rm:
 
                             # go through all the players in the game
                             for pid, pl in self.players.items():
@@ -189,11 +190,11 @@ class MudServerWorker(threading.Thread):
                                     # send them a message telling them that the player
                                     # left the room
                                     self.mud.send_message(pid, "{} left via exit '{}'".format(
-                                                                self.players[id]["name"], ex))
+                                                        self.players[id]["name"], ex))
 
                             # update the player's current room to the one the exit leads to
-                            self.players[id]["room"] = rm["exits"][ex]
-                            rm = rooms[self.players[id]["room"]]
+                            self.players[id]["room"] = rm.get_exit(ex).get_destination()
+                            rm = self.players[id]["room"]
 
                             # go through all the players in the game
                             for pid, pl in self.players.items():
