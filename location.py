@@ -39,6 +39,9 @@ class Exit:
             return other in self._names
 
     def __contains__(self, other):
+        '''Overriding in operator
+        Returns True if other is in list of names
+        '''
         return other in self._names
 
     def __iter__(self):
@@ -46,6 +49,7 @@ class Exit:
             yield name
     
     def __str__(self):
+        '''overriding str() function'''
         return "%s: %s" % (self._names[0], self._destination.name)
 
 
@@ -55,6 +59,8 @@ class Location:
     Contains a list of exits to other locations
     Has a name and description
     '''
+
+    #TODO change "player" to "character"
     def __init__(self, name, description):
         self._player_list = []
         self._exit_list = []
@@ -76,13 +82,24 @@ class Location:
         return list(self._player_list)
     
     def add_exit(self, exit_to_add):
+        '''adds an exit, while performing a check for any ambigious names'''
         for exit_name in exit_to_add:
-            assert exit_name not in self._exit_list, "\nLocation:\t%s\nExit:\t\t%s" % (self.name, exit_to_add)
+            assert exit_name not in self._exit_list, \
+            "\nLocation:\t%s\nExit:\t\t%s" % (self.name, exit_to_add)
         self._exit_list.append(exit_to_add)
 
     def exit_list(self):
         '''returns a copy of private exit list'''
         return list(self._exit_list)
+
+    def get_exit(self, exit_name):
+        '''returns an exit corresponding to exit name
+        if exit name is not in list, error is raised'''
+        for exit in self._exit_list:
+                if exit_name == exit:
+                    return exit
+        raise KeyError("Exit with name \'%s\' not in Location %s"
+            % (exit_name, self.name))
 
     def __eq__(self, other):
         return self.name == other

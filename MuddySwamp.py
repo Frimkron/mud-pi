@@ -24,17 +24,6 @@ def v_print(*args, **kwargs):
 		err_print(*args, **kwargs)
 
 
-# structure defining the rooms in the game. Try adding more rooms to the game!
-'''rooms = {
-    "Tavern": {
-        "description": "You're in a cozy tavern warmed by an open fire.",
-        "exits": {"outside": "Outside"},
-    },
-    "Outside": {
-        "description": "You're standing outside a tavern. It's raining.",
-        "exits": {"inside": "Tavern"},
-    }
-}'''
 start_location = Location("Tavern", "this iis the description")
 outside = Location("Outside", "for teh fun of ti")
 start_location.add_exit(Exit(outside, "front door", "outside"))
@@ -163,11 +152,7 @@ while True:
                                                         players[id]["name"], ex))
 
                     # update the player's current room to the one the exit leads to
-                    '''players[id]["room"] = rm["exits"][ex]
-                    rm = rooms[players[id]["room"]]'''
-                    for exit in rm.exit_list():
-                        if ex == exit:
-                            players[id]["room"] = exit.get_destination()
+                    players[id]["room"] = rm.get_exit(ex).get_destination()
 
                     rm = players[id]["room"]
 
