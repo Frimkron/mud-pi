@@ -2,9 +2,12 @@
 import time
 import sys
 import logging
+from fileparser import import_files, get_filenames
+import library
 # import the MUD server class
 from mudserver import MudServer, Event, EventType
 from location import Location, Exit
+
 
 # Setup the logger
 logging.basicConfig(format='%(asctime)s [%(name)s] [%(levelname)s] %(message)s',
@@ -14,20 +17,29 @@ logging.basicConfig(format='%(asctime)s [%(name)s] [%(levelname)s] %(message)s',
         logging.StreamHandler(sys.stdout)
     ])
 
-#prints to stderr
-def err_print(*args, **kwargs):
-	print(*args, file=sys.stderr, **kwargs)
+# TODO: change this to use the Location class!
+rooms = {
+    "Tavern": {
+        "description": "You're in a cozy tavern warmed by an open fire.",
+        "exits": {"outside": "Outside"},
+    },
+    "Outside": {
+        "description": "You're standing outside a tavern. It's raining.",
+        "exits": {"inside": "Tavern"},
+    }
+}
 
-VERBOSE_PRINT = False
-def v_print(*args, **kwargs):
-	if VERBOSE_PRINT:
-		err_print(*args, **kwargs)
+# defining a set of paths
+# by default, we import every json in chars and locations
+import_paths = {
+    "locations" : get_filenames("./locations/", ".json"),
+    "chars" : get_filenames("./chars/", ".json")
+}
 
+imported_lib = import_files(**import_paths)
+library.store_lib(imported_lib)
 
-start_location = Location("Tavern", "this iis the description")
-outside = Location("Outside", "for teh fun of ti")
-start_location.add_exit(Exit(outside, "front door", "outside"))
-outside.add_exit(Exit(start_location, "back inside", "inside", "out of the rain"))
+# TODO: replace this with the player class
 # stores the players in the game
 players = {}
 
@@ -35,7 +47,7 @@ logging.info("Starting server")
 
 # start the server
 mud = MudServer()
-
+library.store_server(mud)
 logging.info("Server started successfully")
 
 # main game loop. We loop forever (i.e. until the program is terminated)
