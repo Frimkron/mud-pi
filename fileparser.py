@@ -175,7 +175,7 @@ class LocationParser(BaseParser):
 class CharacterParser(BaseParser):
     '''Class for Character-Specific parsing'''
 
-    def __init__(segit alf, library={}, fail_library={}):
+    def __init__(self, library={}, fail_library={}):
         # Call the constructor from BaseParser
         super().__init__(type, library, fail_library)
     

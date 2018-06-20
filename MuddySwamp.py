@@ -17,18 +17,6 @@ logging.basicConfig(format='%(asctime)s [%(name)s] [%(levelname)s] %(message)s',
         logging.StreamHandler(sys.stdout)
     ])
 
-# TODO: change this to use the Location class!
-rooms = {
-    "Tavern": {
-        "description": "You're in a cozy tavern warmed by an open fire.",
-        "exits": {"outside": "Outside"},
-    },
-    "Outside": {
-        "description": "You're standing outside a tavern. It's raining.",
-        "exits": {"inside": "Tavern"},
-    }
-}
-
 # defining a set of paths
 # by default, we import every json in chars and locations
 import_paths = {
@@ -39,6 +27,10 @@ import_paths = {
 imported_lib = import_files(**import_paths)
 library.store_lib(imported_lib)
 
+start_location = Location("Starting Location",
+                            "This is the default starting location.")
+if "Marston Basement" in library.locations:
+    start_location = library.locations["Marston Basement"]
 # TODO: replace this with the player class
 # stores the players in the game
 players = {}
