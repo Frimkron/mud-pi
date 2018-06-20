@@ -4,7 +4,7 @@
     "exits": [
         {
             "destination": "Marston First Floor",
-            "names": ["marston, "marston first floor"]
+            "names": ["marston", "marston first floor"]
         }
     ]
 }
