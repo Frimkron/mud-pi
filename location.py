@@ -62,24 +62,27 @@ class Location:
 
     #TODO change "player" to "character"
     def __init__(self, name, description):
-        self._player_list = []
+        self._character_list = []
         self._exit_list = []
         self.name = name
         self.description = description
         # this will come into play later
         self.owner = None
 
-    #TODO: players are currently added based upon id
-    # this should be swapped out for a Player object
-    # call Player.location = self
-    def add_player(self, id):
-        self._player_list.append(id)
+    #TODO: characters are currently added based upon id
+    # this should be swapped out for a character object
+    # call character.location = self
+    def add_char(self, char):
+        self._character_list.append(char)
     
-    def remove_player(self, id):
-        self._player_list.remove(id)
+    def remove_char(self, id, silent=False):
+        self._character_list.remove(char)
+        if not silent:
+            #TODO: message all characters in location
+            pass
     
-    def get_player_list(self):
-        return list(self._player_list)
+    def get_character_list(self):
+        return list(self._character_list)
     
     def add_exit(self, exit_to_add):
         '''adds an exit, while performing a check for any ambigious names'''
@@ -109,7 +112,7 @@ class Location:
         Returns True if:
             if it is an exit or string:
                 there exists an exit in _exit_list that matches
-            if it is a Player or id:
+            if it is a Character or id:
                 there exists a player with that id
         '''
         if isinstance(other, Exit) or isinstance(other, str):
