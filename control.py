@@ -123,7 +123,7 @@ class MultiController(Controller):
         '''returns true if any controller has a new command'''
         return any(ctrl.has_cmd() for ctrl in self)
 
-        
+#TODO: create a receiver base class?     
 
 class Player(Controller):
     '''Player class assigns Controllers to each client ID
@@ -211,80 +211,3 @@ class Nonplayer:
     '''Nonplayer acts as a stream of incoming data
     '''
     pass
-
-
-class CharacterClass:
-    #metaclass
-    #dip through and construct two things:
-    # a Class.commands dict
-    # a help menu
-    pass
-
-
-class Character:
-
-    starting_location = location.Location("NullLocation", "Default Location")
-    names = {}
-
-    def __init__(self, name, controller):
-        self.name = name
-        self.controller = controller
-        self.set_destination(starting_location)
-
-    def die(self):
-        '''method executed when a player is deleted'''
-        print(repr(self) + " died")
-
-    def set_name(self, new_name):
-        '''changes a characters's name, with all appropriate error checking'''
-        if new_name in self.names:
-            raise "Name already taken"
-        if self.name is not None:
-            del(self.names[self.name])
-        self.name = newname
-        player_names[self.name] = self
-
-    #TODO: fix
-    def parse_command(self, line):
-        command = line.split(" ")[0]
-        if command not in self.commands:
-            raise AttributeError("Command not recognized.")
-        method = self.commands[command]
-        self.method(line)
-    
-    def detach(self, hard_detach=True):
-        '''removes a character from its controller
-        if hard_detach is True, the player enter its
-        death process, defined by die
-        '''
-        try:
-            self.controller.receiver = None
-        except AttributeError:
-            return
-        self.controller = None
-        if hard_detach:
-            self._die()
-    
-    def attach(self, controller):
-        self.detach(True)
-        self.controller = controller 
-        self.controller.character = self
-    
-    def set_destination(self, new_location):
-        try:
-            self.location.remove_char(self)
-        except AttributeError:
-            # location was none
-            pass
-        self.location = new_location
-        self.location.add_char(self)
-
-    def update(self):
-        while self.controller.has_input():
-            self.parse_command(self.controller.read())
-    
-    def __del__(self):
-        #TODO: make a hard delete option, that removes the character altogether?
-        self.die()
-        self.location.remove_character(silent=True)
-

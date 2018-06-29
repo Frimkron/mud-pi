@@ -75,7 +75,7 @@ class Location:
     def add_char(self, char):
         self._character_list.append(char)
     
-    def remove_char(self, id, silent=False):
+    def remove_char(self, char, silent=False):
         self._character_list.remove(char)
         if not silent:
             #TODO: message all characters in location
