@@ -1,5 +1,3 @@
-import json
-
 # TODO: consider adding a "CharacterClass" property
 # that restricts who can use an exit
 class Exit:
@@ -69,20 +67,25 @@ class Location:
         # this will come into play later
         self.owner = None
 
-    #TODO: characters are currently added based upon id
-    # this should be swapped out for a character object
-    # call character.location = self
     def add_char(self, char):
         self._character_list.append(char)
+        char.set_location(self)
     
-    def remove_char(self, char, silent=False):
+    def remove_char(self, char, silent=False, exit=None):
         self._character_list.remove(char)
         if not silent:
-            #TODO: message all characters in location
-            pass
+            if exit is not None:
+                self.message_chars("%s left via %s" )
+            else:
+                self.message_chars("%s left." % char)
     
     def get_character_list(self):
         return list(self._character_list)
+    
+    def message_chars(self, msg):
+        '''send message to all characters currently in location'''
+        for char in self._character_list:
+            char.message(msg)
     
     def add_exit(self, exit_to_add):
         '''adds an exit, while performing a check for any ambigious names'''
@@ -118,8 +121,8 @@ class Location:
         if isinstance(other, Exit) or isinstance(other, str):
             return other in self._exit_list
         #replace int with Player
-        elif isinstance(other, int):
-            return other in self._player_list
+        elif isinstance(other, character.Character):
+            return other in self._character_list
         else:
             raise ValueError("Received %s, expected Exit/string, "
                              "Player/int" % type(other))
@@ -132,3 +135,8 @@ class Location:
             return "%s:\n%s" % (self.name, self.description)
         else:
             return self.name
+
+# explanation for this import statement being at the bottom
+# location uses the Character class
+# Character references Location class in body of Character class
+import character
