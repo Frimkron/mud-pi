@@ -1,7 +1,8 @@
-'''this contains an example class
-this is exclusively for testing the
-parser this file is not a template for 
-creating CharacterClasses
-'''
-class ExampleClass:
-    pass
+from character import Character
+
+class ExampleClass(Character):
+    def cmd_echo(self, args):
+        '''Echoes the provided phrase back.
+        usage: example [phrase]
+        '''
+        self.message(args)

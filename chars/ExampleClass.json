@@ -1,6 +1,5 @@
 {
     "name" : "ExampleClass",
     "frequency" : 1,
-    "start" : "Turlington Plaza",
     "path" : "scripts/ExampleClass.py"
 }

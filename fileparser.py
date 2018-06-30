@@ -1,5 +1,6 @@
 import json
 from location import Location, Exit
+from character import CharacterClass
 from numbers import Number
 import os
 import sys
@@ -172,12 +173,13 @@ class LocationParser(BaseParser):
         self.depend_list.extend(exit_list)
         return imported_location
 
+#TODO: make frequency an optional field
 class CharacterParser(BaseParser):
     '''Class for Character-Specific parsing'''
 
     def __init__(self, library={}, fail_library={}):
         # Call the constructor from BaseParser
-        super().__init__(type, library, fail_library)
+        super().__init__(CharacterClass, library, fail_library)
     
     def import_file(self, filename):
         '''Imports a Character from a json sepecified by [filename]'''
@@ -208,7 +210,8 @@ class CharacterParser(BaseParser):
             raise IOError("Could not find character class when parsing")
         else:
             # Return a new instance of the imported class
-            return character_class(imported_frequency)
+            character_class.frequency = imported_frequency
+            return character_class
 
 
 def eprint(*args, **kwargs):
@@ -242,7 +245,7 @@ def import_files(**paths):
         parse_all_files(char_classes, *paths["chars"])
         eprint(char_classes.all_to_str())
     locations.resolve_dependencies()
-    char_classes.resolve_dependencies()    
+    char_classes.resolve_dependencies()
     return library
 
 
