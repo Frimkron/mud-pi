@@ -14,8 +14,8 @@ What is your name?
 ```
 At this point, the player will now enter a valid name.
 ```
->>> Mr. Magic Beard
-Announcement: Welcome to the server, Mr. Magic Beard the Wizard!
+>>> Bill
+Announcement: Welcome to the server, Bill the Wizard!
 ```
 That announcement will be sent to all players.
 
@@ -85,22 +85,37 @@ A few things to note:
  These implementation notes will be likely be moved to another document.
  
 ## Components
-### MudServer.py (Core Server)
+### mudserver.py (Core Server)
   - Based on the MUD Pi code
   - Only changed as necessary
   - handles events like new players joining
   - sends / receives messages
 
+### fileparser.py
+  - defines the Parser class
+    - a Parser contains several lists
+    - provides a framework for resolving dependencies
+  - defines the derived parsers: LocationParser, CharacterParser, etc.
+    - responsible for parsing respective files
+  - contains `import_files` which returns a *library* ready to be unpacked
+  - Locations follow a .json format (see ./locations/template)
+  - CharacterClasses follow a .json format (see ./chars/template)
+
+### library.py
+  - makes in-game objects globally available
+  - key fields:
+    - `locations`: dictionary of locations, indexed by location name
+    - `character_classes`: dictionary of character_classes, indexed by proper name
+    - `random_class`: a random distribution, use `random_class.get()` to produce a random CharacterClass with appropriate weighting
+    - `server`:  stored instance of a MudServer
+  - key functions:
+    - `store_lib(input_library)`: provide a library, which will be unpacked into all the appropriate variables
+    - `store_server(input_server)`: provide an instance of MUD server, which will be stored as `server`
+
 ### MuddySwamp.py 
   - Creates/uses an instance of MudServer
   - imports locations from `./locations/`
-    - locations in json format
-    - creates an instance of Location class (defined in Location.py)
-    - puts new location in dict with name as key
   - imports Characters form `./characters/`
-    - Characters use a json format
-    - Each json includes a path to a script that defines Character behavior
-    - Script must define `class [NAME]` where `[NAME]` is the name of the character
   - begin core loop
     - while the queue is not empty, handle events (new players, incoming messages, etc.) on the queue
     - if queue is empty, sleep
@@ -116,15 +131,39 @@ A few things to note:
     - a simple class representing an exit to some location
     - handles nicknames, names, etc.
 
-### character.py
-  - defines Character class — which serves as template for other classes (might be a metaclass)
+### control.py
+- defines Controller abstract class
+  - the concept of a "Controller" is used to interface with different types of Controllers
+  - Player, Nonplayer, etc. work as controllers
+  - easily multithreaded
+  - Key methods:
+    - `assume_control(receiver)` take control of receiver
+    - `read_cmd()` read a command from the input stream (used by receivers)
+    - `write_msg(msg)` write feedback from the receiver back to the controller
+    - `has_msg()` returns true if there is feedback available for the controller to read
+    - `has_cmd()` returns true if there are commands available for the receiver to read
+- defines the Player class
+  - Players are Controllers that can be accessed by id
+  - using Player.player_ids[id] allows server to grab any particular player
+  - Players are used to interface with players connected
+- future: Nonplayer
+  - reads from file or script
 
-### fileparser.py
-  - responsible for importing in-game locations, items, CharacterClasses
+
+### character.py
+  - defines CharacterClass, the metaclass that in-game character classes
+    - "Wizard" would be a CharacterClass
+    - "Bill the Wizard" is a Wizard
+  - defines Character, the base class for player-controlled characters
+    - establishes default commands
 
 ## Utilities
 
 Utilties found in `./util/`
+
+### distr.py
+  - defines the RandDist class
+  - RandDist creates a weighted random distribution
 
 ### Tester.py [coming soon]
   - needs better name
