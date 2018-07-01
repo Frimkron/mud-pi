@@ -190,11 +190,10 @@ class CharacterParser(BaseParser):
         
         # Get the data out of the file
         imported_name = json_data["name"]
-        imported_frequency = json_data["frequency"]
         imported_path = json_data["path"]
 
         # Check to make sure that the name and frequency are the right types
-        if not isinstance(imported_name, str) or not isinstance(imported_frequency, Number):
+        if not isinstance(imported_name, str):
             raise TypeError('Wrong type when parsing character name or frequency')
         
         # Make sure the script exists
@@ -208,10 +207,10 @@ class CharacterParser(BaseParser):
         # Check to see if the class imported actually exists
         if character_class is None:
             raise IOError("Could not find character class when parsing")
-        else:
-            # Return a new instance of the imported class
-            character_class.frequency = imported_frequency
-            return character_class
+        # Return a new instance of the imported class
+        if "frequency" in json_data:
+            character_class.frequency = float(json_data["frequency"])
+        return character_class
 
 
 def eprint(*args, **kwargs):
