@@ -173,7 +173,7 @@ class LocationParser(BaseParser):
         self.depend_list.extend(exit_list)
         return imported_location
 
-#TODO: make frequency an optional field
+#make an optional "starting_location field for the json"
 class CharacterParser(BaseParser):
     '''Class for Character-Specific parsing'''
 
