@@ -23,19 +23,21 @@ class CharacterClass(type):
         help_menu: a preformatted help menu, printed when 'help' is called
     '''
     def __init__(self, cls, bases, dict):
-        # creating the proper name
+        # creating the proper name, if one is not provided
         if "name" not in dict:
             self.name = camel_to_space(cls)
+        # adding a frequency field, if not already provided
         if "frequency" not in dict:
             self.frequency = 1
-        self.unique_commands = []
-        self.commands = {}
         # creating a dictionary of commands
         # all functions starting with cmd_ are commands
+        self.commands = {}
         for func in dir(self):
             if func.startswith("cmd_"):
                 self.commands[func[4::]] =  getattr(self, func)
         # building the unique_commands
+        # a unique command is not found in any of the base classes
+        self.unique_commands = []
         character_bases = [base for base in bases if hasattr(base, "commands")]
         for command in self.commands:
             # if the command does not appear in any of the base classes
@@ -62,6 +64,8 @@ class CharacterClass(type):
 
 
 class Character(metaclass=CharacterClass):
+    '''Base class for all other characters'''
+
     starting_location = location.Location("NullLocation", "Default Location")
     name = "Default Character"
     names = {}
