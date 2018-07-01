@@ -26,6 +26,8 @@ class CharacterClass(type):
         # creating the proper name
         if "name" not in dict:
             self.name = camel_to_space(cls)
+        if "frequency" not in dict:
+            self.frequency = 1
         self.unique_commands = []
         self.commands = {}
         # creating a dictionary of commands
