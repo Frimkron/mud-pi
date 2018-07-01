@@ -22,14 +22,13 @@ class EventType(enum.Enum):
     MESSAGE_RECEIVED = 1
     PLAYER_DISCONNECT = 2
 
-'''
-class representing Events for the server code to handle
-type: an EventType
-id: corresponding playerID
-message: a string message 
-'''
 #possibly change this to a dict, it might be more pythonic that way
 class Event:
+    '''class representing Events for the server code to handle
+    type: an EventType
+    id: corresponding playerID
+    message: a string message 
+    '''
     def __init__(self, eventType, id, message):
         self.type = eventType
         self.id = id

@@ -167,8 +167,11 @@ class Player(Controller):
         return not self._command_queue.empty()
     
     def has_msg(self):
-        return not self._message_queue.empty()     
-    
+        return not self._message_queue.empty()
+
+    def __str__(self):
+        return "id: %s receiver: %s" % (self.id, self.receiver)
+
     @classmethod
     def send_command(self, id, command):
         '''provides a means to rapidly multiplex commands

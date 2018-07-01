@@ -100,17 +100,24 @@ class Character(metaclass=CharacterClass):
             return
         self.detach(False)
         self.controller = controller 
-        self.controller.character = self
+        self.controller.receiver = self
 
     def update(self):
         while self.controller.has_cmd():
             line = self.controller.read_cmd()
             if line.strip() == "":
                 continue
+            if self.name is None:
+                try:
+                    self.player_set_name(line.strip())
+                except Exception as ex:
+                    self.message(str(ex))
+                finally:
+                    return
             try:
                 self.parse_command(line)
             except Exception as ex:
-                self.message(ex)
+                self.message(str(ex))
 
     def set_name(self, new_name):
         '''changes a characters's name, with all appropriate error checking'''
@@ -120,6 +127,17 @@ class Character(metaclass=CharacterClass):
             del(self.names[self.name])
         self.name = new_name
         self.names[self.name] = self
+    
+    def player_set_name(self, new_name):
+        '''intended for first time players set their name'''
+        if not new_name.isalnum():
+            raise Exception("Names must be alphanumeric.")
+        self.set_name(new_name)
+        #TODO: replace this when appropriate
+        from library import server
+        server.send_message_to_all("Welcome, %s, to the server!" % self)
+        self.cmd_look("")
+        
         
     def set_location(self, new_location, silent=False, reported_exit=None):
         '''sets location, updating the previous and new locations as appropriate
@@ -127,7 +145,7 @@ class Character(metaclass=CharacterClass):
         will be notified of which location he is going to
         '''
         # break recursive loop
-        if self.location is new_location:
+        if self.location == new_location:
             return
         try:
             self.location.remove_char(self, silent, reported_exit)
@@ -146,23 +164,36 @@ class Character(metaclass=CharacterClass):
         method = self.commands[command]
         method(self, args)
     
-    def die(self):
-        '''method executed when a player dies'''
+    def _remove_references(self):
+        '''method executed when a character is being removed
+        this takes care of any undesired references, and allows
+        the player to die'''
         try:
             self.location.remove_char(self)
+            self.location = None
         except AttributeError:
             # location is none
             pass
+        
         # delete character from the name dictionary
-        del self.names[self.name]
+        try:
+            del self.names[self.name]
+        except KeyError:
+            pass
+        
+
+    def die(self):
+        '''method executed when a player dies'''
+        self._remove_references()
+        
 
     def __str__(self):
-        return "%s the %s" % (self.name, self.__class__.name)
+        if self.name is None:
+            return "A nameless %s" % self.__class__.name
+        return "%s the %s" % (self.name, self.__class__.name) 
 
     def __del__(self):
-        #TODO: make a hard delete option, that removes the character altogether?
         self.die()
-        #print(repr(self) + " died")
     
     def cmd_help(self, args):
         '''Show relevant help information for a particular command.

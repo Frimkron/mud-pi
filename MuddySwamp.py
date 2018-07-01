@@ -10,6 +10,7 @@ import library
 # import the MUD server class
 from mudserver import MudServer, Event, EventType
 from location import Location, Exit
+import control
 
 
 # Setup the logger
@@ -49,10 +50,6 @@ class ServerComand:
 
 class MudServerWorker(threading.Thread):
     def __init__(self, q, *args, **kwargs):
-        self.q = q
-        # TODO: replace this with the player class
-        # stores the players in the game
-        self.players = {}
         self.keep_running = True
         imported_lib = import_files(**import_paths)
         library.store_lib(imported_lib)
@@ -85,8 +82,8 @@ class MudServerWorker(threading.Thread):
                         self.mud.send_message_to_all(server_command.params)
                     elif server_command.command_type == ServerCommandEnum.GET_PLAYERS:
                         logging.info("Players: ")
-                        for pid, pl in self.players.items():
-                            logging.info("{}:{}".format(pid, pl))
+                        for player in control.Player.player_ids.values():
+                            logging.info(str(player))
 
             except Exception:
                 pass
@@ -99,136 +96,37 @@ class MudServerWorker(threading.Thread):
             while (len(self.mud.server_queue) > 0):
                 event = self.mud.server_queue.popleft()
                 logging.info(event)
-
                 id = event.id
                 if event.type is EventType.PLAYER_JOIN:
-                    # add the new player to the dictionary, noting that they've not been
-                    # named yet.
-                    # The dictionary key is the player's id number. We set their room to
-                    # None initially until they have entered a name
                     logging.info("Player %s joined." % event.id)
-                    self.players[id] = {
-                        "name": None,
-                        "room": None,
-                    }
-                    #prompt the user for their name
+                    # notifying the player of their class, creating the character
+                    self.mud.send_message(id, "Welcome to MuddySwamp!")
+                    PlayerClass = library.random_class.get()
+                    self.mud.send_message(id, "You are a(n) %s" % PlayerClass)
                     self.mud.send_message(id, "What is your name?")
+                    # creating a controler (a 'Player'), then giving that Player control of a new character
+                    # of whatever class the player is
+                    new_player = control.Player(event.id)
+                    PlayerClass(new_player)
+
                 elif event.type is EventType.MESSAGE_RECEIVED:
-                    # splitting into command + params to make porting the code easier
-                    command, params = (event.message.split(" ", 1) + ["", ""])[:2]
+                    # log the message
                     logging.debug("Event message: " + event.message)
-                    # all these elifs will be replaced with "character.parse([input])"
-                    if self.players[id]["name"] is None:
-                        self.players[id]["name"] = event.message.split(" ")[0]
-                        self.players[id]["room"] = self.start_location
-                        # send each player a message to tell them about the new player
-                        self.mud.send_message_to_all("%s entered the game" % self.players[id]["name"])
-                        self.mud.send_message(id, "Welcome to the game, %s. " %
-                                                                self.players[id]["name"]
-                                    + "Type 'help' for a list of commands. Have fun!")
-                    # 'help' command
-                    elif command == "help":
-
-                        # send the player back the list of possible commands
-                        self.mud.send_message(id, "Commands:")
-                        self.mud.send_message(id, "  say <message>  - Says something out loud, "
-                                            + "e.g. 'say Hello'")
-                        self.mud.send_message(id, "  look           - Examines the "
-                                            + "surroundings, e.g. 'look'")
-                        self.mud.send_message(id, "  go <exit>      - Moves through the exit "
-                                            + "specified, e.g. 'go outside'")
-
-                    # 'say' command
-                    elif command == "say":
-
-                        # go through every player in the game
-                        for pid, pl in self.players.items():
-                            # if they're in the same room as the player
-                            if self.players[pid]["room"] == self.players[id]["room"]:
-                                # send them a message telling them what the player said
-                                self.mud.send_message(pid, "{} says: {}".format(
-                                                            self.players[id]["name"], params))
-
-                    # 'look' command
-                    elif command == "look":
-
-                        # store the player's current room
-                        rm = self.players[id]["room"]
-
-                        # send the player back the description of their current room
-                        self.mud.send_message(id, rm.description)
-
-                        players_here = []
-                        for id in rm.get_player_list():
-                            players_here.append(self.players[id]["name"])
-                        # send player a message containing the list of players in the room
-                        self.mud.send_message(id, "Players here: {}".format(
-                                                                ", ".join(players_here)))
-
-                        # send player a message containing the list of exits from this room
-                        self.mud.send_message(id, "Exits are: {}".format(
-                                                        ", ".join([str(x) for x in rm.exit_list()])))
-
-                    # 'go' command
-                    elif command == "go":
-
-                        # store the exit name
-                        ex = params.lower()
-
-                        # store the player's current room
-                        rm = self.players[id]["room"]
-
-                        # if the specified exit is found in the room's exits list
-                        if ex in rm:
-
-                            # go through all the players in the game
-                            for pid, pl in self.players.items():
-                                # if player is in the same room and isn't the player
-                                # sending the command
-                                if self.players[pid]["room"] == self.players[id]["room"] \
-                                        and pid != id:
-                                    # send them a message telling them that the player
-                                    # left the room
-                                    self.mud.send_message(pid, "{} left via exit '{}'".format(
-                                                        self.players[id]["name"], ex))
-
-                            # update the player's current room to the one the exit leads to
-                            self.players[id]["room"] = rm.get_exit(ex).get_destination()
-                            rm = self.players[id]["room"]
-
-                            # go through all the players in the game
-                            for pid, pl in self.players.items():
-                                # if player is in the same (new) room and isn't the player
-                                # sending the command
-                                if self.players[pid]["room"] == self.players[id]["room"] \
-                                        and pid != id:
-                                    # send them a message telling them that the player
-                                    # entered the room
-                                    self.mud.send_message(pid,
-                                                    "{} arrived via exit '{}'".format(
-                                                                self.players[id]["name"], ex))
-
-                            # send the player a message telling them where they are now
-                            self.mud.send_message(id, "You arrive at '{}'".format(
-                                                                    self.players[id]["room"]))
-
-                        # the specified exit wasn't found in the current room
-                        else:
-                            # send back an 'unknown exit' message
-                            self.mud.send_message(id, "Unknown exit '{}'".format(ex))
-
-                    # some other, unrecognised command
-                    else:
-                        # send back an 'unknown command' message
-                        self.mud.send_message(id, "Unknown command '{}'".format(command))
-
+                    control.Player.send_command(id, event.message)
 
                 elif event.type is EventType.PLAYER_DISCONNECT:
-                    logging.info("Player %s left" % event.id)
-                    #if the player has been added to the list, they must be removed
-                    if event.id in self.players:
-                        self.mud.send_message_to_all("%s quit the game" % self.players[event.id]["name"])
-                        del(self.players[id])
+                    # logging data of the player
+                    player = control.Player.player_ids[id]
+                    logging.info("%s left" % player)
+                    if player.receiver is not None:
+                        pass
+                        #self.mud.send_message_to_all("%s quit the game" % player.receiver)
+                    control.Player.remove_player(id)
+            
+            # temporary: move this to a better place later
+            for id, msg in control.Player.receive_messages():
+                self.mud.send_message(id, msg)
+
         # Shut down the mud instance after the while loop finishes
         self.mud.shutdown()
 

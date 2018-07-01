@@ -22,10 +22,9 @@ def store_lib(input_library):
         # gathering the frequencies for each CharacterClass
         frequencies = [c_class.frequency for c_class in character_classes.values()]
         # creating a dictionary with each frequency
-        freq_dict = dict(zip(character_classes, frequencies))
+        freq_dict = dict(zip(character_classes.values(), frequencies))
         # creading a Random Distribution for each class
         random_class = RandDist(freq_dict)
-
 
 
 def store_server(input_server):
