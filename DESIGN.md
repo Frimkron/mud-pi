@@ -43,46 +43,7 @@ usage: cast [spellname] [arguments]
 Cast [spellname] with arguments. Arguments very by spell. 
 ```
 
-### Note on implementation:
-These help menus will be generated at runtime using docstrings. For a user-level function, **a docstring should be provided**. 
-
-Moreover, the dictionary of user-level functions is generated at runtime. This is done by looking at the attributes of a CharacterClass when it is constructed. All beginning with `cmd_` are considered user-level functions.
-
-Here is an example:
-
-```python
-class Wizard(CharacterClass):
-  def __str__(self):
-      '''overriding the str() function'''
-      return self.name + str(self.level)
-
-  def _level_check(self):
-      '''internal method to check level'''
-      if self.xp > 1000:
-          self.level += 1
-          self.xp = 0
-  
-  def add_spell(self, spell):
-    '''add a spell, making it available to this wizard'''
-    self.spells = spell
-  
-  def cmd_cast(self, spell, *args):
-    '''usage: cast [spellname] [arguments]
-    Cast [spellname] with arguments. Arguments very by spell.
-    '''
-    if spell in self.spells:
-        # cast the spell
-        spell(args)
-```
-A few things to note:
-
- - `__str__` is a special method that hooks into a top level function. You can read about those [here](https://docs.python.org/3/reference/datamodel.html).
-
- - `_level_check` is an internal method, which signals to other programmers that this method should not be called outside the class. (C++/Java programmers, think `private`).
- - `add_spell` is a normal method, intended to be executed anywhere.
- - `cmd_cast` is a user-level method, which can be executed anywhere, or executed by the user as shown above.
-
- These implementation notes will be likely be moved to another document.
+Coming soon: what does one do once they are in the game?
  
 ## Components
 ### mudserver.py (Core Server)
