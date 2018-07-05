@@ -275,7 +275,7 @@ class Wizard(Character):
 
   def add_spell(self, spell):
     '''add a spell, making it available to this wizard'''
-    self.spells{spell.name} = spell
+    self.spells[spell.name] = spell
   
   def cmd_cast(self, spell):
     '''usage: cast [spellname] [arguments]
@@ -450,7 +450,26 @@ Matt the Dark Wizard died.
 
 Here, we witness our spells in action. Though, it seems kind of unfair that we just spammed that command over and over again. Maybe there should be a cooldown. Hmmm... sounds like an idea for another day.
 
+The key take away here should be that there is not a one class-per-file rule, you can have as many CharacterClasses and classes in a file are controlled by the fileparser.py importing system. That brings us to our next section.
+
+### Making your CharacterClass a playable option
+For a CharacterClass to be playable, you first create a json. Suppose our script containing the class definition was in "wizard.py". We should put wizard.py into ./script/. 
+
+Next, we create a json:
+```js
+{
+    "name" : "Wizard",
+    "frequency" : 1,
+    "path" : "scripts/wizard.py"
+}
+```
+For good practice, should save this json as wizard.json (matching the name of the CharacterClass), but this is not required. The important thing is, the "name" field MUST match the name of the CharacterClass, as defined in the file. The "path" should be a path from the top MuddySwamp directory, to the script containing the CharacterClass.
+
+The field "frequency" establishes the relative frequency of this class. Basically, the higher this number, then the more likely that the character will spawn as a Wizard, relative to other CharacterClasses.
+
+### Coming soon
 A few topics that I did not cover in this guide that I will cover later:
 * referencing static objects
 * using mudtools
 * the built-in features of the Character class
+* class data fields, like name, starting_location, and frequency. 
