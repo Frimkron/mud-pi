@@ -1,6 +1,6 @@
 import location
 import control
-
+from time import time
 '''Module defining the CharacterClass metaclass, and Character base class'''
 
 def camel_to_space(name):
@@ -63,6 +63,22 @@ class CharacterClass(type):
         return self.name
 
 
+def cooldown(delay):
+    def delayed_cooldown(func):
+        setattr(func, "last_used", 0)
+        def cooled_down_func(*args, **kwargs):
+            print(func.last_used + delay)
+            print(time())
+            diff = func.last_used + delay - time()
+            if diff < 0:
+                func.last_used = time()
+                return func(*args, **kwargs)
+            else:
+                raise Exception("Cooldown expires in : %i" % diff
+        return cooled_down_func
+    return delayed_cooldown
+
+
 class Character(metaclass=CharacterClass):
     '''Base class for all other characters'''
 
@@ -70,10 +86,9 @@ class Character(metaclass=CharacterClass):
     name = "Default Character"
     names = {}
 
-    def __init__(self, controller):
+    def __init__(self):
         self.name = None
-        self.controller = controller
-        controller.receiver = self
+        self.controller = None
         self.location = None
         self.set_location(self.starting_location, True)
 
@@ -115,14 +130,19 @@ class Character(metaclass=CharacterClass):
                 finally:
                     return
             try:
-                self.parse_command(line)
+                # attempting to parse the command
+                output = self.parse_command(line)
+                # commands can return an output message
+                # if one is received (a str), we sent to the controller
+                if type(output) is str:
+                    self.message(output)
             except Exception as ex:
                 self.message(str(ex))
 
-    def set_name(self, new_name):
+    def _set_name(self, new_name):
         '''changes a characters's name, with all appropriate error checking'''
         if new_name in Character.names:
-            raise Exception("Name already taken.")
+            raise PlayerException("Name already taken.")
         if self.name is not None:
             del(self.names[self.name])
         self.name = new_name
@@ -131,13 +151,12 @@ class Character(metaclass=CharacterClass):
     def player_set_name(self, new_name):
         '''intended for first time players set their name'''
         if not new_name.isalnum():
-            raise Exception("Names must be alphanumeric.")
-        self.set_name(new_name)
+            raise PlayerException("Names must be alphanumeric.")
+        self._set_name(new_name)
         #TODO: replace this when appropriate
         from library import server
         server.send_message_to_all("Welcome, %s, to the server!" % self)
-        self.cmd_look("")
-        
+        self.cmd_look("")     
         
     def set_location(self, new_location, silent=False, reported_exit=None):
         '''sets location, updating the previous and new locations as appropriate
@@ -160,7 +179,7 @@ class Character(metaclass=CharacterClass):
         command = line.split(" ")[0]
         args = line[len(command)::].strip()
         if command not in self.commands:
-            raise AttributeError("Command \'%s\' not recognized." % command)
+            raise PlayerException("Command \'%s\' not recognized." % command)
         method = self.commands[command]
         method(self, args)
     
@@ -180,13 +199,11 @@ class Character(metaclass=CharacterClass):
             del self.names[self.name]
         except KeyError:
             pass
-        
 
     def die(self):
         '''method executed when a player dies'''
         self._remove_references()
         
-
     def __str__(self):
         if self.name is None:
             return "A nameless %s" % self.__class__.name
@@ -207,7 +224,7 @@ class Character(metaclass=CharacterClass):
         if command in self.commands:
             self.message(self.commands[command].__doc__)
         else:
-            raise AttributeError("Command \'%s\' not recognized." % command)
+            return "Command \'%s\' not recognized." % command
 
     def cmd_look(self, args):
         '''Provide information about the current location.
