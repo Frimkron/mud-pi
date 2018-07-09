@@ -63,44 +63,33 @@ class CharacterClass(type):
         return self.name
 
 
-class Character(metaclass=CharacterClass):
+class Character(control.Monoreceiver, metaclass=CharacterClass):
     '''Base class for all other characters'''
 
     starting_location = location.Location("NullLocation", "Default Location")
     name = "Default Character"
     names = {}
 
-    def __init__(self, controller):
+    def __init__(self):
+        super().__init__()
         self.name = None
-        self.controller = controller
-        controller.receiver = self
         self.location = None
         self.set_location(self.starting_location, True)
 
     def message(self, msg):
         '''send a message to the controller of this character'''
-        self.controller.write_msg(msg)
+        if self.controller is not None:
+            self.controller.write_msg(msg)
     
-    def detach(self, hard_detach=True):
+    def detach(self, hard_detach=False):
         '''removes a character from its controller
         if hard_detach is True, the player enter its
         death process, defined by die
         '''
-        try:
-            self.controller.receiver = None
-        except AttributeError:
-            return
-        self.controller = None
+        # calling method from control.Receiver
+        super().detach()
         if hard_detach:
             self.die()
-    
-    def attach(self, controller):
-        # break recursive loop
-        if controller == self.controller:
-            return
-        self.detach(False)
-        self.controller = controller 
-        self.controller.receiver = self
 
     def update(self):
         while self.controller.has_cmd():
@@ -137,7 +126,6 @@ class Character(metaclass=CharacterClass):
         from library import server
         server.send_message_to_all("Welcome, %s, to the server!" % self)
         self.cmd_look("")
-        
         
     def set_location(self, new_location, silent=False, reported_exit=None):
         '''sets location, updating the previous and new locations as appropriate

@@ -1,4 +1,3 @@
-import location
 from abc import ABCMeta, abstractmethod
 import queue
 
@@ -149,10 +148,6 @@ class Player(Controller):
         in future multithreaded versions, this will be removed
         '''
         self.receiver.update()
-        try:
-            self.receiver.update()
-        except AttributeError:
-            pass
 
     def read_cmd(self):
         '''returns a command from the queue
@@ -214,3 +209,130 @@ class Nonplayer:
     '''Nonplayer acts as a stream of incoming data
     '''
     pass
+
+class Receiver(metaclass=ABCMeta):
+    def __init__(self):
+        self.controller = None
+    
+    @abstractmethod
+    def attach(self, controller):
+        pass
+    
+    @abstractmethod
+    def detach(self):
+        pass
+
+    @abstractmethod
+    def update(self):
+        pass
+
+    @classmethod
+    def __subclasshook__(cls, subclass):
+        return hasattr(subclass, 'attach') and hasattr(subclass, 'detach')
+
+
+class Monoreceiver:
+    '''A receiver that only listens to one Controller at a time'''
+    def __init__(self):
+        self.controller = None
+   
+    def attach(self, controller):
+        if controller == self.controller:
+            # controller is already attached
+            # this also breaks a recursive loop that starts with Controller.assume_control
+            return
+        self.detach()
+        self.controller = controller
+        self.controller.receiver = self
+    
+    def detach(self):
+        if self.controller is not None:
+            self.controller.receiver = None
+        self.controller = None
+    
+    def update():
+        pass
+
+
+
+class Multireceiver(Monoreceiver):
+    'A conglomerate of multiple receivers'
+    class DummyController(Controller):
+        def __init__(self, multireceiver, receiver):
+            self.multireceiver = multireceiver
+            self.receiver = receiver
+            self._command_queue = queue.Queue()
+        
+        def has_cmd(self):
+            return not self._command_queue.empty()
+        
+        def has_msg(self):
+            try: 
+                self.multireceiver.controller.has_msg()
+            except AttributeError:
+                # controller is None
+                pass
+
+        def read_cmd(self):
+            return self._command_queue.get()
+        
+        def add_cmd(self, cmd):
+            self._command_queue.put(cmd)
+        
+        def write_msg(self, msg):
+            self.multireceiver._message(self.receiver, msg)
+
+    def __init__(self, *receivers):
+        self.controller = None
+        self.messages = queue.Queue()
+        self._rec_dict = {}
+        for rec in receivers:
+            assert(isinstance(rec, Receiver))
+            self._rec_dict[rec] = \
+                self.DummyController(self, rec)
+        self.outgoing_size = int(len(self._rec_dict) * 1.5)
+        self.outgoing = []
+    
+    def __iter__(self):
+        for rec in self._rec_dict.keys():
+            yield rec
+    
+    def attach(self, controller):
+        super().attach(controller)
+        for rec in self:
+            self._rec_dict[rec].assume_control(rec)
+
+    def detach(self):
+        super().detach()
+        for rec in self:
+            rec.detach()
+
+    def _check_controllers(self):
+        for rec, ctrl in dict(self._rec_dict).items():
+            # detect if receiver has been attached to another receiver
+            if rec.controller != ctrl and rec.controller is not None:
+                self.controller.write_msg("Lost connection wtih %s" % rec)
+                del self._rec_dict[rec]
+                self.outgoing_size = int(len(self._rec_dict) * 1.5)
+
+    def _message(self, receiver, message):
+        if len(self.outgoing) > self.outgoing_size:
+            self.outgoing.pop(0)
+        for rec, msg in self.outgoing:
+            if msg == message and rec != receiver:
+                break
+        else:
+            if self.controller is not None:
+                if len(self.outgoing) == 0 or self.outgoing[-1][0] != receiver:
+                    self.controller.write_msg("[%s]" % receiver)
+                self.controller.write_msg(message)
+                self.outgoing.append((receiver, message))
+
+    def update(self):
+        self._check_controllers()
+        while self.controller.has_cmd():
+            cmd = self.controller.read_cmd()
+            for dummy in self._rec_dict.values():
+                dummy.add_cmd(cmd)
+        for rec in self:
+            rec.update()
