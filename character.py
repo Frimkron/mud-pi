@@ -245,8 +245,8 @@ class Character(metaclass=CharacterClass):
         '''
         self.location.message_chars("%s : %s" % (self, args))
     
-    def cmd_walk(self, args):
-        '''Walk to an accessible location.
+    def cmd_go(self, args):
+        '''Go to an accessible location.
         usage: walk [exit name]
         '''
         exit_name = args.split(" ")[0]
