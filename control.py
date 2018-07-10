@@ -211,53 +211,104 @@ class Nonplayer:
     pass
 
 class Receiver(metaclass=ABCMeta):
+    '''Abstract base class for implementing a Receiver
+    self.controller refers to the object under control
+    this is most frequently a Player
+    
+    a Receiver has three features.
+    a detach method, used to remove completely from a controller
+        (the controller should updated as well)
+    an attach method, to begin listening to a controller()
+        (the controller should be updated as well)
+    an update method, which will be called periodically
+        this method usually handles input from the controller
+    '''
     def __init__(self):
         self.controller = None
     
     @abstractmethod
     def attach(self, controller):
+        '''attach to [controller]'''
         pass
     
     @abstractmethod
     def detach(self):
+        '''detach from controller'''
         pass
 
     @abstractmethod
     def update(self):
+        '''periodically called function'''
         pass
 
     @classmethod
     def __subclasshook__(cls, subclass):
-        return hasattr(subclass, 'attach') and hasattr(subclass, 'detach')
+        '''overriding __subclasshook___, this affects isinstance() and issubclass()
+        any Class implementing the 3 important methods is considered a subclass
+        '''
+        return all([hasattr(subclass, 'attach'), hasattr(subclass, 'detach'),
+                    hasattr(subclass, 'update')])
 
 
 class Monoreceiver:
-    '''A receiver that only listens to one Controller at a time'''
+    '''A simple receiver that implements the 3 methods in a direct fashion.
+    Compare to a Multireceiver, which is constructed from multiple smaller receivers.
+    '''
+
     def __init__(self):
         self.controller = None
    
     def attach(self, controller):
+        '''attach to [controller] to begin listening for input'''
         if controller == self.controller:
             # controller is already attached
             # this also breaks a recursive loop that starts with Controller.assume_control
             return
         self.detach()
+        # updating this receiver and the controller
         self.controller = controller
         self.controller.receiver = self
     
     def detach(self):
+        '''sets controller to none, and removes any unnecessary functions'''
         if self.controller is not None:
             self.controller.receiver = None
         self.controller = None
     
     def update():
+        '''must be implemented by subclasses'''
         pass
 
-
-
+#TODO: for message history, keep track of the index and replace that way
+# this prevents a lot of resizing, and makes the structure more threadsafe 
 class Multireceiver(Monoreceiver):
-    'A conglomerate of multiple receivers'
+    '''A conglomerate of multiple receivers, listening to one controller
+    
+    The Multireceiver acts as a giant Monoreceiver, working like so:
+        attaching the Multireceiver to a controller attaches all 
+    subreceivers to that controller
+        detaching the Multireceiver detaches all subreceivers
+        updating the Multireceiver updates all subreceivers
+
+    The Multireceiver also has two traits:
+    fragile [default: false]:
+        If True, any subreceivers that are detached from their DummyController
+        are removed from the lsit upon update()
+    filter [default: false]:
+        If True, repeated messages from different sources are filtered out
+        For instance, if two characters are in the same location, the controller receive
+        all dialogue twice. We can filter this out instead.
+
+    Implementation note:
+    Uses a set of DummyControllers, passing commands to each one
+    Each subreceiver is set to listen to a corresponding DummyController
+    This is suboptimal, more elegant solutions are welcomed.
+    '''
+
     class DummyController(Controller):
+        '''Straightforward implementation of Controller, intending to pass
+        commands from the parent multireceiver to the subreceivers
+        '''
         def __init__(self, multireceiver, receiver):
             self.multireceiver = multireceiver
             self.receiver = receiver
@@ -282,57 +333,83 @@ class Multireceiver(Monoreceiver):
         def write_msg(self, msg):
             self.multireceiver._message(self.receiver, msg)
 
-    def __init__(self, *receivers):
+    def __init__(self, *subreceivers, **kwargs):
         self.controller = None
         self.messages = queue.Queue()
-        self._rec_dict = {}
-        for rec in receivers:
-            assert(isinstance(rec, Receiver))
-            self._rec_dict[rec] = \
-                self.DummyController(self, rec)
-        self.outgoing_size = int(len(self._rec_dict) * 1.5)
-        self.outgoing = []
-    
+        self._sub_dict = {}
+        for sub in subreceivers:
+            assert(isinstance(sub, Receiver))
+            self._sub_dict[sub] = \
+                self.DummyController(self, sub)
+        self.msg_history = []
+        self.msg_history_size = len(self._sub_dict) * 2
+        self.filter ='filter' in kwargs and kwargs['filter']
+        self.fragile = 'fragile' in kwargs and kwargs['fragile']
+
     def __iter__(self):
-        for rec in self._rec_dict.keys():
-            yield rec
+        '''overriding __iter__
+        iterating over a Multireceiver yields the subreceivers
+        '''
+        for sub in self._sub_dict.keys():
+            yield sub
     
     def attach(self, controller):
+        '''attaches the Multireceiver, including all subreceivers'''
+        # attach the controller to the multireceiver
         super().attach(controller)
-        for rec in self:
-            self._rec_dict[rec].assume_control(rec)
+        # attach each subreceiver to its DummyController
+        for sub in self:
+            self._sub_dict[sub].assume_control(sub)
 
     def detach(self):
+        '''detaches the Multireceiver, including all subreceivers'''
+        # detaching the controller to overall Multireceiver
         super().detach()
-        for rec in self:
-            rec.detach()
+        # detaching each subreceiver to the overall Multireceiver
+        for sub in self:
+            sub.detach()
 
-    def _check_controllers(self):
-        for rec, ctrl in dict(self._rec_dict).items():
-            # detect if receiver has been attached to another receiver
-            if rec.controller != ctrl and rec.controller is not None:
-                self.controller.write_msg("Lost connection wtih %s" % rec)
-                del self._rec_dict[rec]
-                self.outgoing_size = int(len(self._rec_dict) * 1.5)
+    def _check_detached(self):
+        '''remove any subreceivers that have been attached to other controllers'''
+        for sub, ctrl in dict(self._sub_dict).items():
+            # detect if subreceiver has been attached to another controller
+            if sub.controller != ctrl and sub.controller is not None:
+                # send a message to the multireceiver, and remove from dictionary
+                self.controller.write_msg("Lost connection wtih %s" % sub)
+                del self._sub_dict[sub]
+                self.outgoing_size = int(len(self._sub_dict) * 1.5)
 
     def _message(self, receiver, message):
-        if len(self.outgoing) > self.outgoing_size:
-            self.outgoing.pop(0)
-        for rec, msg in self.outgoing:
-            if msg == message and rec != receiver:
-                break
-        else:
-            if self.controller is not None:
-                if len(self.outgoing) == 0 or self.outgoing[-1][0] != receiver:
-                    self.controller.write_msg("[%s]" % receiver)
-                self.controller.write_msg(message)
-                self.outgoing.append((receiver, message))
+        '''send a message to the controller of this multireceiver
+        intended to be called by the DummyControllers
+        '''
+        # if filter is True, then we need to check the recent history
+        if self.filter:
+            # remove any old messages
+            while len(self.msg_history) > self.msg_history_size:
+                self.msg_history.pop(0)
+            # if the same message has been recently sent by the
+            for sub, msg in self.msg_history:
+                if msg == message and sub != receiver:
+                    return
+            else:
+                self.msg_history.append((receiver, message))
+        
+        if self.controller is not None:
+            if (len(self.msg_history) == 0 or self.msg_history[-1][0] != receiver) \
+                and self.filter:
+                self.controller.write_msg("[%s]" % receiver)
+            self.controller.write_msg(message)
 
     def update(self):
-        self._check_controllers()
+        '''update the Multireceiver, and all subreceivers'''
+        if self.fragile:
+            self._check_detached()
+        # pass commands onto DummyControllers
         while self.controller.has_cmd():
             cmd = self.controller.read_cmd()
-            for dummy in self._rec_dict.values():
+            for dummy in self._sub_dict.values():
                 dummy.add_cmd(cmd)
-        for rec in self:
-            rec.update()
+        # update the subreceivers
+        for sub in self:
+            sub.update()
