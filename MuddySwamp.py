@@ -70,11 +70,6 @@ class MudServerWorker(threading.Thread):
         logging.info("Server started successfully.")
         # main game loop. We loop forever (i.e. until the program is terminated)
         while self.keep_running:
-
-            # pause for 1/5 of a second on each loop, so that we don't constantly
-            # use 100% CPU time
-            time.sleep(0.2)
-
             try:
                 server_command = self.q.get(block=False)
                 if server_command is not None:
@@ -107,7 +102,8 @@ class MudServerWorker(threading.Thread):
                     # creating a controler (a 'Player'), then giving that Player control of a new character
                     # of whatever class the player is
                     new_player = control.Player(event.id)
-                    PlayerClass(new_player)
+                    new_character = PlayerClass()
+                    new_player.assume_control(new_character)
 
                 elif event.type is EventType.MESSAGE_RECEIVED:
                     # log the message
