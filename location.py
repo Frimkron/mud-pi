@@ -118,9 +118,15 @@ class Exit:
             self._blacklist.append(other)
 
     def __lshift__(self, other):
+        '''overriding <<
+        returns true if this exit is accessible to [other]
+        '''
         return self.is_accessible(other)
     
     def __iadd__(self, other):
+        '''overriding +=
+        this will make [other] be included
+        '''
         self.include(other)
         return self
     
