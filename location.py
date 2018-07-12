@@ -6,21 +6,57 @@ class Exit:
     Contains: 
         a list of strings [exit names]
         destination [the location this points to]
+    There are also several variables involved with filtering:
+        _whitelist - players and classes allowed through
+        _blacklist - players and classes forbidden
+        closed - set True to close this exit to EVERYONE
+        restricted - True to apply restrictions; False if unrestricted
+        assume_include -what happens to players neither in whitelist|blacklist
+            If True: players not in lists are allowed in
+            If False: players not in lists are forbidden
     The list can be accessed by treating the this as an iterable
     For instance:
         "exit_name" in myExit [returns true if "exit_name" is in exit]
         for exit_name in myExit:
             [iterates over all the possible exit names]
+    For accessibility manipulation:
+        exit << thing [true if exit is accessible to thing]
+        exit += thing [include thing in exit]
+        exit -= thing [exclude thing in exit]
     '''
-    def __init__(self, destination, primary_name, *other_names):
+    def __init__(self, destination, primary_name, *other_names, **kwargs):
         '''Constructor for Exit
         Takes as input:
             location [location it points to]
             at least one name is required [primary name]
             additional names are optional
+            optional keyword arguments (whitelist, blacklist, assume_include)
         '''
         self._destination = destination
         self._names = [primary_name] + list(other_names)
+        self._whitelist = []
+        self._blacklist = []
+        if 'whitelist' in kwargs:
+            self._whitelist.extend(kwargs['whitelist'])
+        if 'blacklist' in kwargs:
+            self._blacklist.extend(kwargs['blacklist'])
+        print(self._blacklist)
+        self.closed = False
+        self.restricted = True
+        self.assume_include = True
+        if 'assume_include' in kwargs:
+            self.assume_include = kwargs['assume_include']
+        else:    
+            if len(self._whitelist) > 0:
+                # if whitelist and blacklist are provided
+                # then there is an ambiguity that must be resolved
+                if len(self._blacklist) > 0:
+                    ex = ("When both whitelist and blacklist keyword args "
+                         "are provided, boolean keyword \'assume_include\' "
+                         "must be supplied")
+                    raise Exception(ex)
+                else:
+                    self.assume_include = False
     
     def get_destination(self):
         return self._destination
@@ -35,6 +71,78 @@ class Exit:
             return self._destination == other._destination
         except AttributeError:
             return other in self._names
+
+    def is_accessible(self, other):
+        '''Overriding << pe
+        Returns True if this Exit is accessible to 
+        player or class [other]
+        '''
+        if self.closed:
+            return False
+        if not self.restricted:
+            return True
+        # checking if other is an instance of type
+        # for instance, a character is an instance of a CharacterClass
+        # if we pass in a character, this block will be executed
+        # if we pass in a CharacterClass, this block will be skipped
+        if not isinstance(other, type):
+            if other in self._blacklist:
+                return False
+            if other in self._whitelist:
+                return True 
+            other = type(other)
+        if self.assume_include:
+            return other not in self._blacklist
+        else:
+            return other in self._whitelist
+        
+    def include(self, other):
+        '''
+        include [other], allowing them to access this exit
+        that is, remove from internal blacklist, add to the whitelist
+        this will make [other] be included
+        '''
+        if other in self._blacklist:
+            self._blacklist.remove(other)
+        if not other in self._whitelist:
+            self._whitelist.append(other)
+
+    def exclude(self, other):
+        '''
+        exclude [other] from accessing this exit
+        that is, remove from internal whitelist, and add to the blacklist
+        '''
+        if other in self._whitelist:
+            self._whitelist.remove(other)
+        if other not in self._blacklist:
+            self._blacklist.append(other)
+
+    def __lshift__(self, other):
+        return self.is_accessible(other)
+    
+    def __iadd__(self, other):
+        self.include(other)
+        return self
+    
+    def __isub__(self, other):
+        '''overriding -=
+        this will make [other] be excluded
+        '''
+        self.exclude(other)
+        return self
+
+    def __eq__(self, other):
+        '''overriding ==
+        if a name is provided, returns true this exit contains the name
+        if a Location is provided, returns true if it is the destination
+        else, returns true if the exit equals this exit
+        '''
+        if isinstance(other, str):
+            return other in self
+        elif isinstance(other, Location):
+            return self._destination == other
+        else:
+            return self is other
 
     def __contains__(self, other):
         '''Overriding in operator
