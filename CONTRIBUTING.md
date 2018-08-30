@@ -4,17 +4,17 @@ Thank you for helping out with the Open Source Club's MuddySwamp project!
 
 Following these guidelines helps us keep good project workflow. We appreciate you working with us on it.
 
-Please read our [CODE_OF_CONDUCT.md](./CODE_OF_CONDUCT.md) to understand our community expectations. Check out our [slack](https://ufosc.slack.com) for any additional questions or just to hangout!
+Please read our [CODE_OF_CONDUCT.md](./CODE_OF_CONDUCT.md) to understand our community expectations. Check out our [discord](https://discord.gg/SCqmG3x) for any additional questions or just to hangout!
 
 # How do I help?
 
-Please check the **[Projects]()** and **[Issues]()** pages for current tasks. If you see something that you would like to help with, ask about helping in a comment and we'll assign it too you. If you're just starting out, checkout our **[beginner friendly]()** issues for ways to help. 
+Please check the **[Projects](https://github.com/ufosc/MuddySwamp/projects)** and **[Issues](https://github.com/ufosc/MuddySwamp/issues)** pages for current tasks. If you see something that you would like to help with, ask about helping in a comment and we'll assign it too you. If you're just starting out, checkout our **[beginner friendly](https://github.com/ufosc/MuddySwamp/issues?q=is%3Aopen+is%3Aissue+label%3A%22good+first+issue%22)** issues for ways to help. 
 
-Checkout the [DESIGN.md](docs/DESIGN.md) file for a high level explanation of the project.
+Checkout the [DESIGN.md](./DESIGN.md) file for a high level explanation of the project.
 
 # Report Bug 
 
-Check to see if someone already reported this [bug]() already exists. If so then leave a comment on that issue. If not, please provide a detailed description of the bug. Include what was happening before the error, all settings, and test results. This helps us more quickly identify and solve any problems. Create an **[Issue]()** with the description and add a bug label. We will do our best to respond quickly to it. 
+Check to see if someone already reported this [bug](https://github.com/ufosc/MuddySwamp/issues). If so then leave a comment on that issue. If not, please provide a detailed description of the bug. Include what was happening before the error, all settings, and test results. This helps us more quickly identify and solve any problems. **[Create an Issue](https://github.com/ufosc/MuddySwamp/issues/new)** with the description and add a bug label. We will do our best to respond quickly to it. 
 
 ## Testing on your own Server
 
@@ -29,7 +29,7 @@ Then with a telnet client, you will connect to the following IP like so:
 For contributors working on server code, make sure you test changes like so before submitting changes.
 # Request a Feature
 
-Check to see if the feature is already listed in our [TODO.md](docs/TODO.md). If it's not, describe the feature and why it would be beneficial. Create an **[Issue]()** with this description and add a feature enhancement label. We will do our best to respond quickly to it. 
+Check to see if the feature is already listed in our [TODO.md](./TODO.md). If it's not, describe the feature and why it would be beneficial. **[Create an Issue](https://github.com/ufosc/MuddySwamp/issues/new)** with this description and add a feature enhancement label. We will do our best to respond quickly to it. 
 
 
 ### Submit Changes 
@@ -53,7 +53,7 @@ Check to see if the feature is already listed in our [TODO.md](docs/TODO.md). If
 Please read [DESIGN.md](./DESIGN.md) before you contribute code. Any inquiries are appreciated.
 ## Style Guide 
 
-Use our **[.editorconfig]()** to help automatically format your code. A short list of what we require.
+Use our **[.editorconfig](./.editorconfig)** to help automatically format your code. A short list of what we require.
 
 For a longer more descriptive list, check out our club's **[general style guidelines](https://github.com/ufosc/resources/blob/master/coding-guidelines/general-style.md)**.
 
