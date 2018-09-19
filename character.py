@@ -1,6 +1,6 @@
 import location
 import control
-
+from time import time
 '''Module defining the CharacterClass metaclass, and Character base class'''
 
 def camel_to_space(name):
@@ -63,7 +63,24 @@ class CharacterClass(type):
         return self.name
 
 
-class Character(control.Monoreceiver, metaclass=CharacterClass):
+def cooldown(delay):
+    def delayed_cooldown(func):
+        setattr(func, "last_used", 0)
+        def cooled_down_func(*args, **kwargs):
+            print(func.last_used + delay)
+            print(time())
+            diff = func.last_used + delay - time()
+            if diff < 0:
+                func.last_used = time()
+                return func(*args, **kwargs)
+            else:
+                raise Exception("Cooldown expires in : %i" % diff
+        return cooled_down_func
+    return delayed_cooldown
+
+
+class Character(metaclass=CharacterClass):
+>>>>>>> develop-organize
     '''Base class for all other characters'''
 
     starting_location = location.Location("NullLocation", "Default Location")
@@ -72,6 +89,12 @@ class Character(control.Monoreceiver, metaclass=CharacterClass):
 
     def __init__(self):
         super().__init__()
+        self.name = None
+        self.location = None
+        self.set_location(self.starting_location, True)
+
+    def message(self, msg):
+        '''send a message to the controller of this character'''
         self.name = None
         self.location = None
         self.set_location(self.starting_location, True)
@@ -108,10 +131,10 @@ class Character(control.Monoreceiver, metaclass=CharacterClass):
             except Exception as ex:
                 self.message(str(ex))
 
-    def set_name(self, new_name):
+    def _set_name(self, new_name):
         '''changes a characters's name, with all appropriate error checking'''
         if new_name in Character.names:
-            raise Exception("Name already taken.")
+            raise PlayerException("Name already taken.")
         if self.name is not None:
             del(self.names[self.name])
         self.name = new_name
@@ -120,8 +143,8 @@ class Character(control.Monoreceiver, metaclass=CharacterClass):
     def player_set_name(self, new_name):
         '''intended for first time players set their name'''
         if not new_name.isalnum():
-            raise Exception("Names must be alphanumeric.")
-        self.set_name(new_name)
+            raise PlayerException("Names must be alphanumeric.")
+        self._set_name(new_name)
         #TODO: replace this when appropriate
         from library import server
         server.send_message_to_all("Welcome, %s, to the server!" % self)
@@ -168,13 +191,11 @@ class Character(control.Monoreceiver, metaclass=CharacterClass):
             del self.names[self.name]
         except KeyError:
             pass
-        
 
     def die(self):
         '''method executed when a player dies'''
         self._remove_references()
         
-
     def __str__(self):
         if self.name is None:
             return "A nameless %s" % self.__class__.name
