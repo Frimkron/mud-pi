@@ -1,0 +1,10 @@
+{
+    "name": "Turlington Plaza",
+    "description": "People hustle around. Some guy is yelling about the coming revolution.",
+    "exits": [
+        {
+            "destination": "Marston First Floor",
+            "names": ["marston", "marston first floor"]
+        }
+    ]
+}

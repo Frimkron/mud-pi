@@ -1,0 +1,14 @@
+{
+    "name": "This is the name of the location",
+    "description": "Enter a descriptive few sentences. \nYou can also put newlines",
+    "exits": [
+        {
+            "destination": "destination this exit points to",
+            "names": ["primary name", "other name1", "other name2"]
+        },
+        {
+            "destination": "here is another destination",
+            "names": ["primary name"]
+        }
+    ]
+}

@@ -1,0 +1,14 @@
+{
+    "name": "Marston Basement Bathroom",
+    "description": "A paper towel dispenser precariously hangs from the wall. You notice one stall has a strange green glow eminating from it.",
+    "exits": [
+        {
+            "destination": "Marston Basement",
+            "names": ["exit", "marston basement"]
+        },
+        {
+            "destination": "Basement Stall",
+            "names": ["stall", "0w0 what's this", "this dependency should work"]
+        }
+    ]
+}

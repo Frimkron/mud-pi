@@ -11,7 +11,10 @@ import select
 import time
 import sys
 import enum
+import logging
 from collections import deque
+from numbers import Number
+from location import Location
 
 #creating an Enum for EventTypes
 class EventType(enum.Enum):
@@ -19,14 +22,13 @@ class EventType(enum.Enum):
     MESSAGE_RECEIVED = 1
     PLAYER_DISCONNECT = 2
 
-'''
-class representing Events for the server code to handle
-type: an EventType
-id: corresponding playerID
-message: a string message 
-'''
 #possibly change this to a dict, it might be more pythonic that way
 class Event:
+    '''class representing Events for the server code to handle
+    type: an EventType
+    id: corresponding playerID
+    message: a string message 
+    '''
     def __init__(self, eventType, id, message):
         self.type = eventType
         self.id = id
@@ -111,6 +113,8 @@ class MudServer(object):
         self._events = []
         self._new_events = []
 
+        logging.debug("Starting listening socket.")
+
         # create a new tcp socket which will be used to listen for new clients
         self._listen_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
@@ -132,6 +136,8 @@ class MudServer(object):
 
         # start listening for connections on the socket
         self._listen_socket.listen(1)
+
+        logging.info("Listening on " + ":".join(map(str, self._listen_socket.getsockname())))
         # using a deque for the event queue
         self.server_queue = deque()
 
@@ -208,6 +214,32 @@ class MudServer(object):
         # we make sure to put a newline on the end so the client receives the
         # message on its own line
         self._attempt_send(to, message+"\n\r")
+    
+    def send_message_to_all(self, message):
+        """Sends the text in the 'message' parameter to every player that
+        is connected to the server"""
+        for client in self._clients:
+            self.send_message(client, message)
+    
+    def send_message_to_location(self, location, message):
+        """Sends a message to every player in the location passed"""
+        if isinstance(location, Location):
+            self.send_message_to_list(location.get_player_list(), message)
+    
+    def send_message_to_list(self, to_who, message):
+        """Sends the text in the 'message' parameter to every player that
+        is in the 'to_who' parameter. The to_who list can either be a list of 
+        Location objects or a list of client ids."""
+        # Make sure the parameter is actually a list with data in it
+        if isinstance(to_who, list) and len(to_who) > 0:
+            # Handle a list of player ids
+            if isinstance(to_who[0], Number):
+                for player_id in to_who:
+                    self.send_message(player_id, message)
+            # Handle a list of Locations
+            elif isinstance(to_who[0], Location):
+                for location in to_who:
+                    self.send_message_to_location(location, message)
 
     def shutdown(self):
         """Closes down the server, disconnecting all clients and
@@ -216,15 +248,15 @@ class MudServer(object):
         # for each client
         for cl in self._clients.values():
             # close the socket, disconnecting the client
-            cl.socket.shutdown()
+            cl.socket.shutdown(socket.SHUT_RDWR)
             cl.socket.close()
         # stop listening for new clients
         self._listen_socket.close()
 
     def _attempt_send(self, clid, data):
         # python 2/3 compatability fix - convert non-unicode string to unicode
-        if sys.version < '3' and type(data) != unicode:
-            data = unicode(data, "latin1")
+        if sys.version < '3' and type(data) != unicode: #pylint: disable=E0602
+            data = unicode(data, "latin1") #pylint: disable=E0602
         try:
             # look up the client in the client map and use 'sendall' to send
             # the message string on the socket. 'sendall' ensures that all of
@@ -233,7 +265,7 @@ class MudServer(object):
         # KeyError will be raised if there is no client with the given id in
         # the map
         except KeyError:
-            print("Key error occurred.", file=sys.stderr)
+            logging.error("Key error occurred.")
             pass
         # If there is a connection problem with the client (e.g. they have
         # disconnected) a socket error will be raised
@@ -258,6 +290,8 @@ class MudServer(object):
         # 'accept' returns a new socket and address info which can be used to
         # communicate with the new client
         joined_socket, addr = self._listen_socket.accept()
+
+        logging.info("Client connected at: " + ":".join(map(str, addr)))
 
         # set non-blocking mode on the new socket. This means that 'send' and
         # 'recv' will return immediately without waiting

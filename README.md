@@ -27,12 +27,6 @@ Simply connect with a telnet client of your choosing. By default, the server use
 Navigate to the terminal, and type
 
     telnet <ip address> 1234
-		
-#### On MacOS High Sierra and higher
-
-Navigate to the terminal, and type
-
-    nc <ip address> 1234
 
 #### On Windows:
 
