@@ -74,13 +74,12 @@ def cooldown(delay):
                 func.last_used = time()
                 return func(*args, **kwargs)
             else:
-                raise Exception("Cooldown expires in : %i" % diff
+                raise Exception("Cooldown expires in : %i" % diff)
         return cooled_down_func
     return delayed_cooldown
 
 
 class Character(metaclass=CharacterClass):
->>>>>>> develop-organize
     '''Base class for all other characters'''
 
     starting_location = location.Location("NullLocation", "Default Location")
