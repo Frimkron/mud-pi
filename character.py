@@ -79,7 +79,7 @@ def cooldown(delay):
     return delayed_cooldown
 
 
-class Character(metaclass=CharacterClass):
+class Character(control.Monoreceiver, metaclass=CharacterClass):
     '''Base class for all other characters'''
 
     starting_location = location.Location("NullLocation", "Default Location")
@@ -213,7 +213,7 @@ class Character(metaclass=CharacterClass):
             return
         command = args.split(" ")[0]
         if command in self.commands:
-            self.message(self.commands[command].__doc__)
+            self.message(str(self.commands[command].__doc__))
         else:
             raise AttributeError("Command \'%s\' not recognized." % command)
 
