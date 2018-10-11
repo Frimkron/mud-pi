@@ -132,6 +132,19 @@ Of course if you're feeling more adventurous you could take a look at the
 slightly more advanced networking code in `mudserver.py`.
 
 
+MUD-Pi-Based Projects
+---------------------
+
+Here are some of the cool projects people have made from MUD-Pi:
+
+* **[ESP8266 MUD](http://git.savsoul.com/barry/esp8266-Mud) by Barry Ruffner** -
+  a MUD that runs entirely within an ESP8266 microchip, using MicroPython
+* **[MuddySwamp](https://github.com/ufosc/MuddySwamp) by the University of**
+  **Florida Open Source Club** - a UF-themed MUD
+* **[DUM](https://github.com/wowpin/dum-generic) by Bartek Radwanski** - a 
+  feature-rich MUD engine
+
+
 Author
 ------
 
