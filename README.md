@@ -141,8 +141,8 @@ Here are some of the cool projects people have made from MUD-Pi:
   a MUD that runs entirely within an ESP8266 microchip, using MicroPython
 * **[MuddySwamp](https://github.com/ufosc/MuddySwamp) by the University of**
   **Florida Open Source Club** - a UF-themed MUD
-* **[DUM](https://github.com/wowpin/dum-generic) by Bartek Radwanski** - a 
-  feature-rich MUD engine
+* **[Dumserver](https://github.com/wowpin/dumserver) by Bartek Radwanski** - 
+  a feature-rich MUD engine
 
 
 Author
