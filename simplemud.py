@@ -30,12 +30,16 @@ from mudserver import MudServer
 # structure defining the rooms in the game. Try adding more rooms to the game!
 rooms = {
     "Tavern": {
-        "description": "You're in a cozy tavern warmed by an open fire.",
-        "exits": {"outside": "Outside"},
+        "description": "\nYou're in a cozy tavern warmed by an open fire.\n",
+        "exits": {"outside": "Outside Tavern"},
     },
-    "Outside": {
-        "description": "You're standing outside a tavern. It's raining.",
-        "exits": {"inside": "Tavern"},
+    "Outside Tavern": {
+        "description": "\nYou're standing outside a tavern. It's raining.\n",
+        "exits": {"inside": "Tavern", "bathroom": "OutHouse"},
+    },
+    "OutHouse": {
+        "description": "\nAs you open the door flys swarm disperse out. You step inside anyway...\n",
+        "exits": {"outside": "Outside Tavern"},
     }
 }
 
@@ -67,6 +71,9 @@ while True:
         players[id] = {
             "name": None,
             "room": None,
+            "level": 1,
+            "hp": 100,
+            "inventory": ["Notebook"]
         }
 
         # send the new player a prompt for their name
@@ -108,7 +115,7 @@ while True:
             # go through all the players in the game
             for pid, pl in players.items():
                 # send each player a message to tell them about the new player
-                mud.send_message(pid, "{} entered the game".format(
+                mud.send_message(pid, "\n{} entered the game".format(
                                                         players[id]["name"]))
 
             # send the new player a welcome message
@@ -131,6 +138,8 @@ while True:
                                  + "e.g. 'say Hello'")
             mud.send_message(id, "  look           - Examines the "
                                  + "surroundings, e.g. 'look'")
+            mud.send_message(id, "  inventory      - Opens your inventory "
+                                 + "e.g. 'i, I, inventory'")
             mud.send_message(id, "  go <exit>      - Moves through the exit "
                                  + "specified, e.g. 'go outside'")
 
@@ -142,7 +151,7 @@ while True:
                 # if they're in the same room as the player
                 if players[pid]["room"] == players[id]["room"]:
                     # send them a message telling them what the player said
-                    mud.send_message(pid, "{} says: {}".format(
+                    mud.send_message(pid, "\n-{} says: {}".format(
                                                 players[id]["name"], params))
 
         # 'look' command
@@ -171,6 +180,12 @@ while True:
             # send player a message containing the list of exits from this room
             mud.send_message(id, "Exits are: {}".format(
                                                     ", ".join(rm["exits"])))
+
+        # "inventory" command
+        elif command in ["inventory", "i", "I"]:
+            for item in players[id]["inventory"]:
+                mud.send_message(id, "Your inventory: {}".format(str(players[id]["inventory"])))
+                # print('* ' + str(players[id]["inventory"]))
 
         # 'go' command
         elif command == "go":
