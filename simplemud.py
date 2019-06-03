@@ -31,11 +31,11 @@ from mudserver import MudServer
 # structure defining the rooms in the game. Try adding more rooms to the game!
 rooms = {
     "Tavern": {
-        "description": "\nYou're in a cozy tavern warmed by an open fire.\n",
+        "description": "\nYou're in a cozy tavern warmed by an open fire. This seems like a nice place to relax and socialize\n",
         "exits": {"outside": "Outside Tavern"},
     },
     "Outside Tavern": {
-        "description": "\nYou're standing outside a tavern. It's raining.\n",
+        "description": "\nYou're standing outside a tavern. It's raining. To you left is a wooden out house.\n",
         "exits": {"inside": "Tavern", "bathroom": "OutHouse"},
     },
     "OutHouse": {
