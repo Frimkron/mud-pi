@@ -78,7 +78,6 @@ while True:
 
         # send the new player a prompt for their name
         mud.send_message(id, "What is your name?")
-
     # go through any recently disconnected players
     for id in mud.get_disconnected_players():
 
@@ -109,6 +108,9 @@ while True:
         # their name and move them to the starting room.
         if players[id]["name"] is None:
 
+            if command == "" or str.isdigit(command):
+                mud.send_message(id, "Please enter a valid name...")
+                break
             players[id]["name"] = command
             players[id]["room"] = "Tavern"
 
