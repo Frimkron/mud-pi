@@ -22,6 +22,7 @@ author: Mark Frimston - mfrimston@gmail.com
 """
 
 import time
+import re
 
 # import the MUD server class
 from mudserver import MudServer
@@ -107,8 +108,7 @@ while True:
         # if the player hasn't given their name yet, use this first command as
         # their name and move them to the starting room.
         if players[id]["name"] is None:
-
-            if command == "" or str.isdigit(command):
+            if command == "" or str.isdigit(command) or re.match("[^a-zA-Z0-9_]*$", command):
                 mud.send_message(id, "Please enter a valid name...")
                 break
             players[id]["name"] = command
