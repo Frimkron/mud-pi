@@ -1,0 +1,7 @@
+autopep8==1.4.4
+certifi==2019.3.9
+colorama==0.4.1
+pipenv==2018.11.26
+pycodestyle==2.5.0
+virtualenv==16.6.0
+virtualenv-clone==0.5.3
