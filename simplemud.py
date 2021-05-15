@@ -133,6 +133,8 @@ while True:
                                  + "surroundings, e.g. 'look'")
             mud.send_message(id, "  go <exit>      - Moves through the exit "
                                  + "specified, e.g. 'go outside'")
+            mud.send_message(id, "  emote <message> - Express some emotion or similar "
+                                 "to the players in the room, e.g. 'emote gives you a hug'")
 
         # 'say' command
         elif command == "say":
