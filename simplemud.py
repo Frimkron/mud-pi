@@ -145,6 +145,15 @@ while True:
                     mud.send_message(pid, "{} says: {}".format(
                                                 players[id]["name"], params))
 
+        elif command == "emote":
+            # go through every player in the game
+            for pid, pl in players.items():
+                # if they're in the same room as the player
+                if players[pid]["room"] == players[id]["room"]:
+                    # send them a message telling them what the player emoted
+                    mud.send_message(pid, "{} {}".format(
+                                                players[id]["name"], params))
+
         # 'look' command
         elif command == "look":
 
