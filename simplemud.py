@@ -31,11 +31,11 @@ from mudserver import MudServer
 rooms = {
     "Tavern": {
         "description": "You're in a cozy tavern warmed by an open fire.",
-        "exits": {"outside": "Outside"},
+        "exits": {"Outside"},
     },
     "Outside": {
         "description": "You're standing outside a tavern. It's raining.",
-        "exits": {"inside": "Tavern"},
+        "exits": {"Tavern"},
     }
 }
 
@@ -132,7 +132,7 @@ while True:
             mud.send_message(id, "  look           - Examines the "
                                  + "surroundings, e.g. 'look'")
             mud.send_message(id, "  go <exit>      - Moves through the exit "
-                                 + "specified, e.g. 'go outside'")
+                                 + "specified, e.g. 'go Outside'")
 
         # 'say' command
         elif command == "say":
@@ -176,10 +176,11 @@ while True:
         elif command == "go":
 
             # store the exit name
-            ex = params.lower()
+            ex = params
 
             # store the player's current room
-            rm = rooms[players[id]["room"]]
+            rmk = players[id]["room"]
+            rm = rooms[rmk]
 
             # if the specified exit is found in the room's exits list
             if ex in rm["exits"]:
@@ -188,32 +189,27 @@ while True:
                 for pid, pl in players.items():
                     # if player is in the same room and isn't the player
                     # sending the command
-                    if players[pid]["room"] == players[id]["room"] \
-                            and pid != id:
+                    if players[pid]["room"] == rmk and pid != id:
                         # send them a message telling them that the player
                         # left the room
-                        mud.send_message(pid, "{} left via exit '{}'".format(
+                        mud.send_message(pid, "{} left toward '{}'".format(
                                                       players[id]["name"], ex))
 
                 # update the player's current room to the one the exit leads to
-                players[id]["room"] = rm["exits"][ex]
-                rm = rooms[players[id]["room"]]
+                players[id]["room"] = ex
 
                 # go through all the players in the game
                 for pid, pl in players.items():
                     # if player is in the same (new) room and isn't the player
                     # sending the command
-                    if players[pid]["room"] == players[id]["room"] \
-                            and pid != id:
+                    if players[pid]["room"] == ex and pid != id:
                         # send them a message telling them that the player
                         # entered the room
-                        mud.send_message(pid,
-                                         "{} arrived via exit '{}'".format(
-                                                      players[id]["name"], ex))
+                        mud.send_message(pid, "{} arrived from '{}'".format(
+                                                      players[id]["name"], rmk))
 
                 # send the player a message telling them where they are now
-                mud.send_message(id, "You arrive at '{}'".format(
-                                                          players[id]["room"]))
+                mud.send_message(id, "You arrive at '{}'".format(ex))
 
             # the specified exit wasn't found in the current room
             else:
